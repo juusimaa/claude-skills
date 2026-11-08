@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>__TITLE__</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,8 +12,8 @@
   --fg: #16202b;
   --muted: #5b6875;
   --line: #d9e0e6;
-  --accent: #1d5d8a;
-  --sold: #b3261e;
+  --accent: #b93a0e;
+  --sold: #9f1239;
   --low: #8a5a00;
   --free: #1f6b3a;
   --chip: #e6edf3;
@@ -22,13 +23,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f151b; --surface: #161e26; --fg: #e4eaf0; --muted: #94a3b1; --line: #26313c;
-    --accent: #7db7e3; --sold: #ff8a80; --low: #f0b54a; --free: #6fcf8f; --chip: #1f2a35;
+    --accent: #ff7a45; --sold: #ff8fab; --low: #f0b54a; --free: #6fcf8f; --chip: #1f2a35;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f151b; --surface: #161e26; --fg: #e4eaf0; --muted: #94a3b1; --line: #26313c;
-  --accent: #7db7e3; --sold: #ff8a80; --low: #f0b54a; --free: #6fcf8f; --chip: #1f2a35;
+  --accent: #ff7a45; --sold: #ff8fab; --low: #f0b54a; --free: #6fcf8f; --chip: #1f2a35;
   color-scheme: dark;
 }
 body {
@@ -38,9 +39,13 @@ body {
   padding-block: 28px 48px;
 }
 .wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 22px; }
-header { display: grid; gap: 6px; }
-h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 6vw, 3.2rem); line-height: 1; margin: 0; letter-spacing: .01em; text-transform: uppercase; text-wrap: balance; }
-.range { font-family: var(--display); font-weight: 500; font-size: 1.35rem; color: var(--accent); letter-spacing: .04em; text-transform: uppercase; }
+/* Julisteyläosa: kaupunki täydellä voimalla, päivät korostusvärillä, paksu painoviiva alla. */
+header { display: grid; gap: 10px; padding-bottom: 16px; border-bottom: 6px solid var(--fg); container-type: inline-size; }
+h1 { font-family: var(--display); font-weight: 700; margin: 0; text-transform: uppercase; display: grid; }
+h1 .t1 { font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 500; letter-spacing: .14em; line-height: 1; }
+/* Kaupunki mitoitetaan kirjainmäärän mukaan yhdelle riville (versaali-Barlow ~0.5em/merkki). */
+h1 .t2 { font-size: clamp(2rem, calc(100cqi / (var(--chars, 10) * .52)), 6rem); line-height: .86; letter-spacing: -.01em; white-space: nowrap; }
+.range { font-family: var(--display); font-weight: 700; font-size: clamp(1.5rem, 4.4vw, 2.3rem); line-height: 1; color: var(--accent); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
 .meta { color: var(--muted); font-size: .92rem; margin: 0; }
 
 .filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
@@ -51,13 +56,21 @@ h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 6vw
 #maxp { width: 6.5rem; }
 .check { display: flex; gap: 6px; align-items: center; padding-bottom: 8px; cursor: pointer; }
 .check input { accent-color: var(--accent); width: 1rem; height: 1rem; }
+.check[hidden] { display: none; }
 .count { margin-left: auto; padding-bottom: 8px; font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.count .hidden-note { display: block; font-size: .82rem; }
+.reset { font: inherit; font-size: .9rem; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+.reset:hover { border-color: var(--accent); }
+.reset[hidden] { display: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.day { display: grid; grid-template-columns: 6rem 1fr; gap: 0 18px; border-top: 2px solid var(--fg); padding-top: 10px; }
-.stamp { font-family: var(--display); line-height: 1; min-width: 0; }
-.stamp .wd { display: block; font-size: 1rem; font-weight: 500; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-.stamp .dm { display: block; font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.day { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0 18px; border-top: 3px solid var(--fg); padding-top: 12px; }
+/* Päiväleima pysyy näkyvissä koko päivän keikkojen ajan. */
+.stamp { font-family: var(--display); line-height: 1; min-width: 0; position: sticky; top: 12px; align-self: start; }
+.stamp .wd { display: block; font-size: 1.05rem; font-weight: 700; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
+.stamp .dm { display: block; font-size: 2.7rem; font-weight: 700; line-height: .9; letter-spacing: -.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Perjantai ja lauantai ovat keikkailtoja: niiden päivä painetaan korostusvärillä. */
+.stamp.weekend .dm { color: var(--accent); }
 .stamp .yr { display: block; font-size: 1rem; font-weight: 500; letter-spacing: .06em; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
 .year-break { font-family: var(--display); font-weight: 700; font-size: 1.6rem; letter-spacing: .04em; color: var(--accent); padding-top: 8px; }
 .gigs { display: grid; min-width: 0; }
@@ -65,29 +78,33 @@ h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 6vw
 .gig:last-child { border-bottom: 0; }
 .artist { font-weight: 600; font-size: 1.05rem; overflow-wrap: anywhere; }
 .where { color: var(--muted); font-size: .92rem; overflow-wrap: anywhere; }
-.right { display: grid; justify-items: end; align-content: start; gap: 4px; text-align: right; }
-.price { font-variant-numeric: tabular-nums; font-size: .95rem; }
+.right { display: flex; flex-wrap: wrap; justify-content: end; align-items: baseline; gap: 4px 12px; text-align: right; }
+.price { font-variant-numeric: tabular-nums; font-size: 1.05rem; font-weight: 600; white-space: nowrap; }
+.price.free { color: var(--free); }
+.price.unknown { color: var(--muted); font-weight: 400; }
+.gig.is-sold .price { color: var(--muted); font-weight: 400; }
 .pill { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); white-space: nowrap; }
 .pill.sold { color: var(--sold); background: color-mix(in srgb, var(--sold) 14%, transparent); }
 .pill.low { color: var(--low); background: color-mix(in srgb, var(--low) 16%, transparent); }
-.pill.free { color: var(--free); background: color-mix(in srgb, var(--free) 15%, transparent); }
 .link { color: var(--accent); font-weight: 600; font-size: .92rem; text-decoration: none; }
 .link:hover { text-decoration: underline; }
 .note { grid-column: 1 / -1; font-size: .85rem; color: var(--muted); }
 .gig.is-sold .artist { text-decoration: line-through; text-decoration-color: var(--sold); text-decoration-thickness: 1px; }
 
-.empty { color: var(--muted); padding: 24px 0; border-top: 2px solid var(--fg); }
+.empty { color: var(--muted); padding: 24px 0; border-top: 2px solid var(--fg); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.empty p { flex: 1 1 100%; margin: 0; }
 footer { color: var(--muted); font-size: .88rem; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
 footer p { margin: 0; max-width: 70ch; }
 footer a { color: var(--accent); }
 
 @media (max-width: 560px) {
   .day { grid-template-columns: 1fr; gap: 4px; }
+  .stamp { top: 0; z-index: 1; background: var(--bg); padding: 6px 0; margin-top: -6px; }
   .stamp .wd, .stamp .dm, .stamp .yr { display: inline; }
-  .stamp .dm { font-size: 1.6rem; margin-left: 6px; }
+  .stamp .dm { font-size: 2.1rem; margin-left: 8px; }
   .stamp .yr { margin-left: 6px; }
   .gig { grid-template-columns: 1fr; }
-  .right { justify-items: start; text-align: left; grid-auto-flow: column; justify-content: start; align-items: center; gap: 10px; }
+  .right { justify-content: start; text-align: left; }
   .count { margin-left: 0; width: 100%; }
   #q { width: 100%; }
   .filters .field:first-child { flex: 1 1 100%; }
@@ -114,7 +131,9 @@ footer a { color: var(--accent); }
       <label for="maxp">Enintään €</label>
       <input id="maxp" type="number" min="0" step="1" inputmode="numeric" placeholder="ei rajaa">
     </div>
+    <label class="check" for="unpriced" hidden><input id="unpriced" type="checkbox"> Näytä myös hinnattomat</label>
     <label class="check" for="hidesold"><input id="hidesold" type="checkbox"> Piilota loppuunmyydyt</label>
+    <button class="reset" id="clear" type="button" hidden>Tyhjennä</button>
     <div class="count" id="count" aria-live="polite"></div>
   </form>
 
@@ -127,6 +146,10 @@ footer a { color: var(--accent); }
 <script>
 (function () {
   const data = JSON.parse(document.getElementById("data").textContent);
+  // Rivi ilman kelvollista päivää rikkoisi ryhmittelyn; sivu.py tarkistaa saman, tämä on varmistus.
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+  data.events = (data.events || []).filter((e) => e && ISO.test(e.date || "") && e.artist);
+  for (const e of data.events) if (e.end && !ISO.test(e.end)) delete e.end;
   const WD = ["su", "ma", "ti", "ke", "to", "pe", "la"];
   const WD_LONG = ["sunnuntai", "maanantai", "tiistai", "keskiviikko", "torstai", "perjantai", "lauantai"];
   const MONTHS = ["tammikuu", "helmikuu", "maaliskuu", "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu", "syyskuu", "lokakuu", "marraskuu", "joulukuu"];
@@ -164,15 +187,53 @@ footer a { color: var(--accent); }
             WD[dt.getDay()], WD_LONG[dt.getDay()], MONTHS[m - 1], String(y)].join(" ").toLowerCase();
   }
   for (const e of data.events) e._hay = haystack(e);
-  // Alin hinta vertailua varten: "alk. 33 €" -> 33, "79,90€ | VIP 99,90€" -> 79.9, "Ilmainen" -> 0.
-  function minPrice(e) {
-    if (e.status === "ilmainen" || /ilmai/i.test(e.price || "")) return 0;
-    const m = (e.price || "").match(/\d+(?:[.,]\d+)?/);
-    return m ? parseFloat(m[0].replace(",", ".")) : null;
+  // Hintatekstin luvut: "12,50-6,50 €" -> [12.5, 6.5]. Ikärajat, kellonajat ja päivät
+  // ("alle 12-vuotiaat", "klo 19", "14.11.") eivät ole hintoja.
+  const isFree = (e) => e.status === "ilmainen" || /^\s*(ilmai|vapaa pääsy)/i.test(e.price || "");
+  function priceNums(text) {
+    const cleaned = text
+      .replace(/\b(alle|yli)\s+\d+(-v\S*|\s*v\.?)?/gi, " ")
+      .replace(/\d+\s*-?\s*v(uotia\S*|\.)/gi, " ")
+      .replace(/klo\s*\d+([.:]\d+)?/gi, " ")
+      .replace(/\d{1,2}\.\d{1,2}\.(\d{4})?/g, " ");
+    return (cleaned.match(/\d+(?:[.,]\d+)?/g) || []).map((n) => parseFloat(n.replace(",", ".")));
   }
-  const pillClass = { "loppuunmyyty": "sold", "vähissä": "low", "ilmainen": "free" };
+  // Alin hinta vertailua varten: "35 / 20€" -> 20, "Ilmainen" -> 0, "–" -> null.
+  function minPrice(e) {
+    if (isFree(e)) return 0;
+    const nums = priceNums(e.price || "");
+    return nums.length ? Math.min(...nums) : null;
+  }
+  for (const e of data.events) e._min = minPrice(e);
+  // Taulukon hinta lyhyeksi: "35 / 20€ (alempi hinta koskee …)" -> "20–35 €", "alk. 15€" -> "alk. 15 €".
+  // Alkuperäinen teksti jää vihjeeksi (title), kun lyhennys jättää jotain pois.
+  const euro = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2).replace(".", ",")) + " €";
+  function shortPrice(e) {
+    const text = (e.price || "").trim();
+    if (isFree(e)) return { text: "Ilmainen", cls: "free" };
+    const nums = [...new Set(priceNums(text))].sort((a, b) => a - b);
+    if (!nums.length) {
+      // "Loppuunmyyty" hinnan paikalla toistaisi tilan; muu sanallinen hinta ("Ei vielä myynnissä") näytetään.
+      if (!text || text === "–" || text.toLowerCase() === e.status || /loppuunmyyty|sold\s*out/i.test(text)) return { text: "–", cls: "unknown", title: "Hinta ei tiedossa" };
+      return { text, cls: "" };
+    }
+    const lo = nums[0], hi = nums[nums.length - 1];
+    const short = /\balk\./i.test(text) ? "alk. " + euro(lo)
+      : lo === hi ? euro(lo)
+      : euro(lo).replace(" €", "") + "–" + euro(hi);
+    return { text: short, cls: "", title: short.replace(/\s/g, "") === text.replace(/\s/g, "") ? "" : text };
+  }
+  const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+  // Pilleri vain poikkeuksille; saatavilla on oletus ja ilmainen näkyy jo hinnassa.
+  const pillClass = { "loppuunmyyty": "sold", "peruttu": "sold", "vähissä": "low", "ei vielä myynnissä": "" };
 
-  $("title").textContent = data.title || "Keikat";
+  // "Keikat Helsingissä" -> pieni "Keikat" ja kaupunki julisteen kokoisena.
+  const title = (data.title || "Keikat").trim();
+  const m = title.match(/^(keikat)\s+(.+)$/i);
+  const city = el("span", "t2", m ? m[2] : title);
+  city.style.setProperty("--chars", [...city.textContent].length);
+  if (m) $("title").append(el("span", "t1", m[1]));
+  $("title").append(city);
   $("range").textContent = data.range || "";
   $("generated").textContent = data.generated ? "Haettu " + data.generated : "";
 
@@ -182,22 +243,60 @@ footer a { color: var(--accent); }
   function render() {
     const q = $("q").value.trim().toLowerCase();
     const venue = $("venue").value;
-    const maxp = $("maxp").value === "" ? null : Number($("maxp").value);
+    const raw = $("maxp").value.trim();
+    const maxp = raw === "" || !Number.isFinite(Number(raw)) ? null : Math.max(0, Number(raw));
+    const showUnpriced = $("unpriced").checked;
     const hideSold = $("hidesold").checked;
+    $("unpriced").closest(".check").hidden = maxp == null;
+    let unpricedHidden = 0;
     const dq = dateQuery(q);
     const words = q.split(/\s+/).filter(Boolean);
     const rows = data.events.filter((e) => {
       if (venue && e.venue !== venue) return false;
       if (hideSold && e.status === "loppuunmyyty") return false;
       if (dq ? !covers(e, dq) : !words.every((w) => e._hay.includes(w))) return false;
-      if (maxp != null) { const p = minPrice(e); if (p != null && p > maxp) return false; }
+      if (maxp != null) {
+        // Tuntematon hinta ei täytä hintarajaa, ellei käyttäjä erikseen halua nähdä hinnattomat.
+        if (e._min == null) { if (!showUnpriced) { unpricedHidden++; return false; } }
+        else if (e._min > maxp) return false;
+      }
       return true;
     });
+    const filtered = Boolean(q || venue || maxp != null || hideSold);
+    $("clear").hidden = !filtered;
 
     const list = $("list");
     list.replaceChildren();
-    $("count").textContent = rows.length + " / " + data.events.length + " keikkaa";
-    if (!rows.length) { list.append(el("p", "empty", "Mikään keikka ei vastaa suodattimia. Tyhjennä haku tai nosta hintarajaa.")); return; }
+    const count = $("count");
+    count.replaceChildren(filtered
+      ? rows.length + " / " + plural(data.events.length, "keikka", "keikkaa")
+      : "Kaikki " + plural(data.events.length, "keikka", "keikkaa"));
+    if (unpricedHidden) count.append(el("span", "hidden-note", plural(unpricedHidden, "hinnaton piilotettu", "hinnatonta piilotettu")));
+    if (!data.events.length) {
+      const box = el("div", "empty");
+      box.append(el("p", null, "Tältä aikaväliltä ei löytynyt keikkoja."));
+      list.append(box);
+      return;
+    }
+    if (!rows.length) {
+      const box = el("div", "empty");
+      const hint = unpricedHidden
+        ? "Mikään keikka ei vastaa suodattimia. " + plural(unpricedHidden, "keikka", "keikkaa") + " on piilotettu, koska hinta ei ole tiedossa."
+        : "Mikään keikka ei vastaa suodattimia.";
+      const btn = el("button", "reset", "Tyhjennä suodattimet");
+      btn.type = "button";
+      btn.addEventListener("click", resetFilters);
+      box.append(el("p", null, hint));
+      if (unpricedHidden) {
+        const show = el("button", "reset", "Näytä hinnattomat (" + unpricedHidden + ")");
+        show.type = "button";
+        show.addEventListener("click", () => { $("unpriced").checked = true; render(); });
+        box.append(show);
+      }
+      box.append(btn);
+      list.append(box);
+      return;
+    }
 
     const byDay = new Map();
     for (const e of rows) { if (!byDay.has(e.date)) byDay.set(e.date, []); byDay.get(e.date).push(e); }
@@ -208,7 +307,7 @@ footer a { color: var(--accent); }
       const y = +date.slice(0, 4);
       if (y !== lastYear) { frag.append(el("div", "year-break", String(y))); lastYear = y; }
       const day = el("section", "day");
-      const stamp = el("div", "stamp");
+      const stamp = el("div", "stamp" + (p.wd === "pe" || p.wd === "la" ? " weekend" : ""));
       stamp.append(el("span", "wd", p.wd), el("span", "dm", p.dm));
       if (p.yr) stamp.append(el("span", "yr", p.yr));
       const box = el("div", "gigs");
@@ -221,8 +320,13 @@ footer a { color: var(--accent); }
         if (e.time) where += (where ? " · " : "") + e.time;
         left.append(el("div", "where", where));
         const right = el("div", "right");
-        right.append(el("span", "price", e.price || "–"));
-        if (e.status) right.append(el("span", "pill " + (pillClass[e.status] || ""), e.status));
+        const sp = shortPrice(e);
+        const price = el("span", "price" + (sp.cls ? " " + sp.cls : ""), sp.text);
+        if (sp.title) price.title = sp.title;
+        const hasPill = e.status in pillClass;
+        if (hasPill) right.append(el("span", "pill " + pillClass[e.status], e.status));
+        // Pillerin vieressä tuntematon hinta "–" on pelkkää kohinaa.
+        if (!(hasPill && sp.cls === "unknown")) right.append(price);
         if (e.url) { const a = el("a", "link", "Linkki"); a.href = e.url; a.target = "_blank"; a.rel = "noopener"; right.append(a); }
         g.append(left, right);
         if (e.note) g.append(el("div", "note", e.note));
@@ -246,8 +350,14 @@ footer a { color: var(--accent); }
     f.append(p);
   }
 
+  function resetFilters() {
+    $("filters").reset();
+    render();
+    $("q").focus();
+  }
+  $("clear").addEventListener("click", resetFilters);
   $("filters").addEventListener("submit", (ev) => ev.preventDefault());
-  for (const id of ["q", "venue", "maxp", "hidesold"]) $(id).addEventListener("input", render);
+  for (const id of ["q", "venue", "maxp", "unpriced", "hidesold"]) $(id).addEventListener("input", render);
   render();
 })();
 </script>

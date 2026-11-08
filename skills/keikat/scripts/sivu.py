@@ -21,6 +21,7 @@ Käyttö:
 import html
 import json
 import pathlib
+import re
 import sys
 
 TEMPLATE = pathlib.Path(__file__).resolve().parent.parent / "templates" / "keikat.html"
@@ -35,6 +36,12 @@ def main() -> int:
     missing = [i for i, e in enumerate(events) if not all(e.get(k) for k in ("date", "artist", "venue"))]
     if missing:
         print(f"tapahtumista puuttuu date, artist tai venue: indeksit {missing}", file=sys.stderr)
+        return 1
+    iso = re.compile(r"\d{4}-\d{2}-\d{2}")
+    bad = [i for i, e in enumerate(events)
+           if not iso.fullmatch(e["date"]) or (e.get("end") and not iso.fullmatch(e["end"]))]
+    if bad:
+        print(f"date tai end ei ole muotoa 2026-11-14: indeksit {bad}", file=sys.stderr)
         return 1
     data["events"] = sorted(events, key=lambda e: (e["date"], e["venue"], e["artist"]))
     # "</" katkaisisi script-elementin, joten se escapetaan JSONin sisällä.
