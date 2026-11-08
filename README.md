@@ -11,15 +11,19 @@ Suomalaisiin palveluihin ja paikkakuntiin liittyviä skillejä [Claude Codelle](
 ### keikat
 
 ```
-/keikat          # Oulun keikat, kuukausi tästä päivästä
-/keikat 3kk      # Oulun keikat, 1–12 kuukautta
+/keikat          # oletuskaupunki ja -aikaväli (tehdasasetus Oulu, 1 kk)
+/keikat 3kk      # 1–12 kuukautta
 /keikat joulukuussa
 /keikat Tampere  # Tampereen keikat
 /keikat Helsinki 3kk
 /keikat joulukuussa Turussa
+
+/keikat asetukset Tampere 3kk   # tallenna oletukset pelkälle /keikat-komennolle
+/keikat asetukset               # näytä nykyiset oletukset
+/keikat asetukset nollaa        # takaisin tehdasasetuksiin
 ```
 
-Ilman kaupunkia haetaan Oulun keikat. Kaupunki voi olla missä kohtaa komentoa tahansa.
+Kaupunki voi olla missä kohtaa komentoa tahansa. Ilman kaupunkia ja aikaväliä käytetään tallennettuja oletuksia, ja komennon omat arvot ohittavat ne vain sillä kertaa. Oletukset tallentuvat tiedostoon `~/.config/keikat/asetukset.json` (tai `$XDG_CONFIG_HOME/keikat/`), eivät skillin kansioon.
 
 Tuetut kaupungit: Helsinki, Espoo, Vantaa, Tampere, Turku, Oulu, Jyväskylä, Kuopio, Lahti, Pori, Kouvola, Joensuu, Lappeenranta, Hämeenlinna, Vaasa, Seinäjoki ja Rovaniemi.
 
@@ -62,7 +66,7 @@ python3 skills/keikat/scripts/tiketti.py --city Tampere --months 3 --table
 python3 skills/keikat/scripts/ticketmaster.py --city Tampere --months 3 --table
 ```
 
-`paikat_<kaupunki>.py`-skriptit lukevat yhden kaupungin keikkapaikkoja. `tiketti.py`, `ticketmaster.py` ja `linkedevents.py` ottavat kaupungin valinnalla `--city`.
+`asetukset.py` näyttää ja tallentaa oletukset (`--kaupunki`, `--kuukaudet`, `--nollaa`). `paikat_<kaupunki>.py`-skriptit lukevat yhden kaupungin keikkapaikkoja. `tiketti.py`, `ticketmaster.py` ja `linkedevents.py` ottavat kaupungin valinnalla `--city`.
 
 ## Rakenne
 

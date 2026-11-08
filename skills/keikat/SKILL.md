@@ -1,19 +1,39 @@
 ---
 name: keikat
-description: Hakee lähiaikojen musiikkikeikat (isot ja pienet, myös baarikeikat) valitusta suomalaisesta kaupungista useista lähteistä ja listaa ne taulukkona päivämäärän, artistin, paikan, lippujen hinnan ja loppuunmyynti-tilan kanssa. Tuetut kaupungit: Helsinki, Espoo, Vantaa, Tampere, Turku, Oulu, Jyväskylä, Kuopio, Lahti, Pori, Kouvola, Joensuu, Lappeenranta, Hämeenlinna, Vaasa, Seinäjoki ja Rovaniemi (oletus Oulu). Käytä kun käyttäjä kysyy "mitä keikkoja Tampereella", "keikat Helsingissä tällä viikolla/kuussa", "onko Turussa keikkaa X:llä" tai kutsuu /keikat.
-argument-hint: "[kaupunki] [1kk–12kk]"
+description: Hakee lähiaikojen musiikkikeikat (isot ja pienet, myös baarikeikat) valitusta suomalaisesta kaupungista useista lähteistä ja listaa ne taulukkona päivämäärän, artistin, paikan, lippujen hinnan ja loppuunmyynti-tilan kanssa. Tuetut kaupungit: Helsinki, Espoo, Vantaa, Tampere, Turku, Oulu, Jyväskylä, Kuopio, Lahti, Pori, Kouvola, Joensuu, Lappeenranta, Hämeenlinna, Vaasa, Seinäjoki ja Rovaniemi (oletus Oulu, vaihdettavissa komennolla /keikat asetukset). Käytä kun käyttäjä kysyy "mitä keikkoja Tampereella", "keikat Helsingissä tällä viikolla/kuussa", "onko Turussa keikkaa X:llä" tai kutsuu /keikat.
+argument-hint: "[kaupunki] [1kk–12kk] | asetukset [kaupunki] [1kk–12kk]"
 ---
 
 # Keikat
 
 Tuota ajantasainen, yhdistetty lista yhden kaupungin musiikkikeikoista. Vastaa suomeksi.
 
+## Oletusasetukset
+
+Käyttäjä voi tallentaa oman oletuskaupungin ja -aikavälin, joita pelkkä `/keikat` käyttää. Asetukset ovat tiedostossa `~/.config/keikat/asetukset.json`, ja niitä luetaan ja kirjoitetaan vain skriptillä:
+
+```bash
+python3 -I <tämän skillin kansio>/scripts/asetukset.py                                  # voimassa olevat oletukset (JSON)
+python3 -I <tämän skillin kansio>/scripts/asetukset.py --kaupunki Tampere --kuukaudet 3  # tallenna (kumpikin valinnainen)
+python3 -I <tämän skillin kansio>/scripts/asetukset.py --nollaa                         # takaisin oletuksiin (Oulu, 1 kk)
+```
+
+**Jos argumentti alkaa sanalla `asetukset`** (myös `asetus`, `oletus`, `oletukset`), älä hae keikkoja. Toimi näin:
+- `asetukset Tampere 3kk` tai `asetukset 6kk`: tallenna annetut arvot. Anna kaupunki perusmuodossa (`Tampereella` → `--kaupunki Tampere`) ja aikaväli lukuna 1–12. Vain annetut arvot muuttuvat.
+- `asetukset` ilman muuta: näytä nykyiset oletukset ja kerro yhdellä rivillä, miten ne vaihdetaan.
+- `asetukset nollaa`: aja `--nollaa`.
+- Kerro lopuksi yhdellä rivillä skriptin tulostamat oletukset, esim. "Oletus nyt: Tampere, 3 kk. Pelkkä /keikat käyttää näitä." Jos skripti palauttaa virheen (tuntematon kaupunki), kerro se ja luettele tuetut kaupungit.
+
+Myös vapaa pyyntö kuten "aseta oletuskaupungiksi Turku" tallentaa asetuksen samalla skriptillä.
+
 ## Parametrit (kaikki valinnaisia)
 
-Komennon argumentti on: `$ARGUMENTS`. Siinä voi olla kaupunki, aikaväli tai molemmat missä järjestyksessä tahansa (esim. `Tampere 3kk`, `3kk Tampere`, `Helsingissä`). Poimi parametrit myös vapaasta pyynnöstä, muuten käytä oletuksia:
+Aja ensin `asetukset.py` ilman valintoja ja käytä sen tulostamaa `kaupunki` ja `kuukaudet` oletuksina. Jos skripti ei toimi, oletus on Oulu ja 1 kk.
 
-- **Kaupunki**: oletus Oulu. Tunnista nimi myös taivutettuna ja pienellä kirjoitettuna ("tampereella", "Seinäjoella", "jyvaskyla"). Jos kaupunki ei ole alla olevassa taulukossa, kerro yhdellä lauseella, ettei sitä tueta, luettele tuetut kaupungit ja lopeta. Älä hae oletuskaupungin keikkoja tilalle.
-- **Aikaväli**: oletus 1 kuukausi tästä päivästä eteenpäin.
+Komennon argumentti on: `$ARGUMENTS`. Siinä voi olla kaupunki, aikaväli tai molemmat missä järjestyksessä tahansa (esim. `Tampere 3kk`, `3kk Tampere`, `Helsingissä`). Argumentin arvot ohittavat tallennetut oletukset vain tällä kertaa. Poimi parametrit myös vapaasta pyynnöstä, muuten käytä oletuksia:
+
+- **Kaupunki**: oletus asetuksista (tehdasasetus Oulu). Tunnista nimi myös taivutettuna ja pienellä kirjoitettuna ("tampereella", "Seinäjoella", "jyvaskyla"). Jos kaupunki ei ole alla olevassa taulukossa, kerro yhdellä lauseella, ettei sitä tueta, luettele tuetut kaupungit ja lopeta. Älä hae oletuskaupungin keikkoja tilalle.
+- **Aikaväli**: oletus asetuksista (tehdasasetus 1 kuukausi) tästä päivästä eteenpäin.
   - Muoto `Nkk` (myös `N kk`, `N kuukautta`, pelkkä luku `N`), jossa N on 1–12: hae N kalenterikuukautta tästä päivästä eteenpäin. Esim. 8.11. ja `3kk` → 8.11.–8.2.
   - Jos N on yli 12, käytä 12 ja kerro siitä yhdellä lauseella.
   - Vapaa aikaväli kuten "tällä viikolla" tai "joulukuussa" tulkitaan sellaisenaan, ja skripteille annetaan `--days`, joka kattaa välin loppuun asti.
