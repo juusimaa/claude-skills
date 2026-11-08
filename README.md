@@ -84,3 +84,9 @@ Jokainen skilli on omassa kansiossaan `skills/<nimi>/`, ja kansion juuressa on `
 ## Huomioita
 
 Skriptit lukevat julkisia tapahtumasivuja, ja sivujen rakenne voi muuttua. Jos jokin lähde lakkaa toimimasta, skripti ilmoittaa siitä ja muut lähteet toimivat edelleen. Oulun musiikkikeskuksen data tulee kaupungin tapahtumapalvelun kalenteriupotuksesta, joka ei ole dokumentoitu rajapinta.
+
+## Lisenssi
+
+[PolyForm Noncommercial 1.0.0](LICENSE.md). Saat käyttää, muokata ja jakaa skillejä ei-kaupallisiin tarkoituksiin, kuten omaan käyttöön, harrastuksiin, opetukseen ja tutkimukseen. Kaupallinen käyttö vaatii erillisen luvan. Lisenssi koskee kaikkia repositorion versioita, myös ennen lisenssitiedostoa tehtyjä committeja.
+
+Copyright © 2026 Jouni Uusimaa
