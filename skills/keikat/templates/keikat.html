@@ -54,10 +54,12 @@ h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 6vw
 .count { margin-left: auto; padding-bottom: 8px; font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.day { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0 18px; border-top: 2px solid var(--fg); padding-top: 10px; }
-.stamp { font-family: var(--display); line-height: 1; }
+.day { display: grid; grid-template-columns: 6rem 1fr; gap: 0 18px; border-top: 2px solid var(--fg); padding-top: 10px; }
+.stamp { font-family: var(--display); line-height: 1; min-width: 0; }
 .stamp .wd { display: block; font-size: 1rem; font-weight: 500; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-.stamp .dm { display: block; font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stamp .dm { display: block; font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stamp .yr { display: block; font-size: 1rem; font-weight: 500; letter-spacing: .06em; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.year-break { font-family: var(--display); font-weight: 700; font-size: 1.6rem; letter-spacing: .04em; color: var(--accent); padding-top: 8px; }
 .gigs { display: grid; min-width: 0; }
 .gig { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .gig:last-child { border-bottom: 0; }
@@ -81,8 +83,9 @@ footer a { color: var(--accent); }
 
 @media (max-width: 560px) {
   .day { grid-template-columns: 1fr; gap: 4px; }
-  .stamp .wd, .stamp .dm { display: inline; }
+  .stamp .wd, .stamp .dm, .stamp .yr { display: inline; }
   .stamp .dm { font-size: 1.6rem; margin-left: 6px; }
+  .stamp .yr { margin-left: 6px; }
   .gig { grid-template-columns: 1fr; }
   .right { justify-items: start; text-align: left; grid-auto-flow: column; justify-content: start; align-items: center; gap: 10px; }
   .count { margin-left: 0; width: 100%; }
@@ -100,8 +103,8 @@ footer a { color: var(--accent); }
 
   <form class="filters" id="filters" autocomplete="off">
     <div class="field">
-      <label for="q">Hae artistia tai paikkaa</label>
-      <input id="q" type="search" placeholder="esim. Tuba">
+      <label for="q">Hae artistia, paikkaa tai päivää</label>
+      <input id="q" type="search" placeholder="esim. Tuba, 14.11. tai joulukuu">
     </div>
     <div class="field">
       <label for="venue">Paikka</label>
@@ -125,6 +128,8 @@ footer a { color: var(--accent); }
 (function () {
   const data = JSON.parse(document.getElementById("data").textContent);
   const WD = ["su", "ma", "ti", "ke", "to", "pe", "la"];
+  const WD_LONG = ["sunnuntai", "maanantai", "tiistai", "keskiviikko", "torstai", "perjantai", "lauantai"];
+  const MONTHS = ["tammikuu", "helmikuu", "maaliskuu", "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu", "syyskuu", "lokakuu", "marraskuu", "joulukuu"];
   const $ = (id) => document.getElementById(id);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const thisYear = new Date().getFullYear();
@@ -132,8 +137,33 @@ footer a { color: var(--accent); }
   function parts(iso) {
     const [y, m, d] = iso.split("-").map(Number);
     const dt = new Date(y, m - 1, d);
-    return { wd: WD[dt.getDay()], dm: d + "." + m + "." + (y !== thisYear ? y : "") };
+    return { wd: WD[dt.getDay()], dm: d + "." + m + ".", yr: y !== thisYear ? String(y) : "", full: d + "." + m + "." + (y !== thisYear ? y : "") };
   }
+
+  // Päivähaku: "14.11.", "14.11", "14.11.2026" ja "2026-11-14" osuvat myös monipäiväisen tapahtuman sisälle.
+  function dateQuery(q) {
+    let m = q.match(/^(\d{1,2})\.(\d{1,2})\.?(\d{4})?$/);
+    if (m) return { d: +m[1], m: +m[2], y: m[3] ? +m[3] : null };
+    m = q.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (m) return { d: +m[3], m: +m[2], y: +m[1] };
+    return null;
+  }
+  function covers(e, dq) {
+    const start = e.date, end = e.end || e.date;
+    const years = dq.y ? [dq.y] : [...new Set([+start.slice(0, 4), +end.slice(0, 4)])];
+    return years.some((y) => {
+      const iso = y + "-" + String(dq.m).padStart(2, "0") + "-" + String(dq.d).padStart(2, "0");
+      return start <= iso && iso <= end;
+    });
+  }
+  // Tekstihakuun mukaan päivän eri kirjoitusasut, viikonpäivä ja kuukauden nimi.
+  function haystack(e) {
+    const [y, m, d] = e.date.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return [e.artist, e.venue, e.date, d + "." + m + ".", d + "." + m + "." + y,
+            WD[dt.getDay()], WD_LONG[dt.getDay()], MONTHS[m - 1], String(y)].join(" ").toLowerCase();
+  }
+  for (const e of data.events) e._hay = haystack(e);
   // Alin hinta vertailua varten: "alk. 33 €" -> 33, "79,90€ | VIP 99,90€" -> 79.9, "Ilmainen" -> 0.
   function minPrice(e) {
     if (e.status === "ilmainen" || /ilmai/i.test(e.price || "")) return 0;
@@ -154,10 +184,12 @@ footer a { color: var(--accent); }
     const venue = $("venue").value;
     const maxp = $("maxp").value === "" ? null : Number($("maxp").value);
     const hideSold = $("hidesold").checked;
+    const dq = dateQuery(q);
+    const words = q.split(/\s+/).filter(Boolean);
     const rows = data.events.filter((e) => {
       if (venue && e.venue !== venue) return false;
       if (hideSold && e.status === "loppuunmyyty") return false;
-      if (q && !((e.artist + " " + e.venue).toLowerCase().includes(q))) return false;
+      if (dq ? !covers(e, dq) : !words.every((w) => e._hay.includes(w))) return false;
       if (maxp != null) { const p = minPrice(e); if (p != null && p > maxp) return false; }
       return true;
     });
@@ -170,18 +202,22 @@ footer a { color: var(--accent); }
     const byDay = new Map();
     for (const e of rows) { if (!byDay.has(e.date)) byDay.set(e.date, []); byDay.get(e.date).push(e); }
     const frag = document.createDocumentFragment();
+    let lastYear = thisYear;
     for (const [date, gigs] of byDay) {
       const p = parts(date);
+      const y = +date.slice(0, 4);
+      if (y !== lastYear) { frag.append(el("div", "year-break", String(y))); lastYear = y; }
       const day = el("section", "day");
       const stamp = el("div", "stamp");
       stamp.append(el("span", "wd", p.wd), el("span", "dm", p.dm));
+      if (p.yr) stamp.append(el("span", "yr", p.yr));
       const box = el("div", "gigs");
       for (const e of gigs) {
         const g = el("article", "gig" + (e.status === "loppuunmyyty" ? " is-sold" : ""));
         const left = el("div");
         left.append(el("div", "artist", e.artist));
         let where = e.venue || "";
-        if (e.end) { const pe = parts(e.end); where += (where ? " · " : "") + "jatkuu " + pe.wd + " " + pe.dm; }
+        if (e.end) { const pe = parts(e.end); where += (where ? " · " : "") + "jatkuu " + pe.wd + " " + pe.full; }
         if (e.time) where += (where ? " · " : "") + e.time;
         left.append(el("div", "where", where));
         const right = el("div", "right");

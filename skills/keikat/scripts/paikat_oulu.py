@@ -178,7 +178,44 @@ def sinfonia_prices(events, limit):
             e["status"] = "ilmainen"
 
 
-SOURCES = {"tarkastamo": tarkastamo, "tullisali": tullisali, "tuba": tuba, "sinfonia": sinfonia}
+MUSIIKKIKESKUS_WIDGET = ("https://tapahtumat.munoulu.fi/widget/641b240943b77a3fdb91963f"
+                         "?currentLocation=https%3A%2F%2Fwww.oulunmusiikkikeskus.fi%2Ftapahtumakalenteri.html&nolog=true")
+
+
+def musiikkikeskus(today):
+    # oulunmusiikkikeskus.fi/tapahtumakalenteri.html upottaa kaupungin tapahtumapalvelun widgetin.
+    # Sivu näyttää kerralla 6 tapahtumaa ("Lisää tapahtumia"), mutta widgetin JSON sisältää kaikki
+    # valmiiksi HTML:nä. Osoite on katsottu selaimen verkkoliikenteestä; se ei ole dokumentoitu rajapinta.
+    data = json.loads(fetch(MUSIIKKIKESKUS_WIDGET))
+    for item in data.get("html", "").split('<div class="bubster-page')[1:]:
+        a = re.search(r'class="bubster-name"[^>]*href="([^"]+)"><span>(.*?)</span>', item, re.S)
+        when = re.search(r'class="bubster-time">(.*?)</div>', item, re.S)
+        if not (a and when):
+            continue
+        when = text(when.group(1))
+        dates = re.findall(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", when)
+        if not dates:
+            continue
+        start = dt.date(int(dates[0][2]), int(dates[0][1]), int(dates[0][0]))
+        place = re.search(r'class="bubster-location">(.*?)</div>', item, re.S)
+        tm = re.search(r"klo\s*([\d:.]+)", when)
+        name = text(a.group(2))
+        venue = text(place.group(1)).split(",")[0] if place else "Oulun Musiikkikeskus"
+        if venue.isupper():
+            venue = venue.capitalize()  # "MADETOJAN SALI" -> "Madetojan sali"
+        # Nimen perässä on usein sali suluissa: "Maustetytöt - MT Unplugged (Madetojan sali)".
+        name = re.sub(r"\s*\(%s\)\s*$" % re.escape(venue), "", name, flags=re.I)
+        e = event(start, name, venue, "", a.group(1).split("?")[0],
+                  time_info=f"klo {tm.group(1)}" if tm else "", source="oulunmusiikkikeskus.fi")
+        # Widgetissä ei ole lipputilannetta, vain peruutus nimen alussa ("PERUTTU! …").
+        e["status"] = "peruttu" if re.match(r"peruttu\b", name, re.I) else ""
+        if len(dates) > 1:
+            e["end"] = dt.date(int(dates[-1][2]), int(dates[-1][1]), int(dates[-1][0])).isoformat()
+        yield e
+
+
+SOURCES = {"tarkastamo": tarkastamo, "tullisali": tullisali, "tuba": tuba, "sinfonia": sinfonia,
+           "musiikkikeskus": musiikkikeskus}
 
 
 def add_months(d: dt.date, n: int) -> dt.date:
