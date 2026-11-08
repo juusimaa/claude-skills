@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap">
 <style>
-/* Layout: keikkajulisteen tiivis päivämäärälista. Päiväotsikko vasemmalla, keikat oikealla, suodatinrivi ylhäällä. */
+/* Layout: julisteyläosa, suodattimet, kiinteä suunnistuspalkki ja päivittäin ryhmitelty lista (päiväleima vasemmalla, keikat oikealla). */
 :root {
   --bg: #f3f5f7;
   --surface: #ffffff;
@@ -33,6 +33,10 @@
   --accent: #ff7a45; --sold: #ff8fab; --low: #f0b54a; --free: #6fcf8f; --chip: #1f2a35; --field-line: #5f6d7b;
   color-scheme: dark;
 }
+/* Selaimen omat pinnat (valinta, kursori, valintaruudut) samasta paletista. */
+:root { accent-color: var(--accent); }
+::selection { background: color-mix(in srgb, var(--accent) 28%, transparent); color: var(--fg); }
+input { caret-color: var(--accent); }
 body {
   background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -55,8 +59,9 @@ h1 .t2 { font-size: clamp(2rem, calc(100cqi / (var(--chars, 10) * .52)), 6rem); 
 .field input, .field select { font: inherit; font-size: 1rem; color: var(--fg); background: var(--bg); border: 1px solid var(--field-line); border-radius: 6px; padding: 7px 9px; min-width: 0; }
 #q { width: 18rem; max-width: 100%; }
 #maxp { width: 6.5rem; }
+#venue { max-width: 18rem; }
 .check { display: flex; gap: 8px; align-items: center; min-height: 44px; cursor: pointer; }
-.check input { accent-color: var(--accent); width: 1.25rem; height: 1.25rem; margin: 0; }
+.check input { width: 1.25rem; height: 1.25rem; margin: 0; }
 .field input::placeholder { color: var(--muted); opacity: 1; }
 .check[hidden] { display: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -102,14 +107,14 @@ h2.stamp:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; 
 .pill.low { color: var(--low); background: color-mix(in srgb, var(--low) 16%, transparent); }
 /* Täyte kasvattaa osuma-alueen 44 px:iin muuttamatta ulkoasua. */
 .link { color: var(--accent); font-weight: 600; font-size: .92rem; text-decoration: none; display: inline-block; padding: 12px 8px; margin: -12px -8px; }
-.link:hover { text-decoration: underline; }
+.link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .note { grid-column: 1 / -1; font-size: .85rem; color: var(--muted); }
 
 .empty { color: var(--muted); padding: 24px 0; border-top: 2px solid var(--fg); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .empty p { flex: 1 1 100%; margin: 0; }
 footer { color: var(--muted); font-size: .88rem; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
 footer p { margin: 0; max-width: 70ch; }
-footer a { color: var(--accent); }
+footer a { color: var(--accent); text-underline-offset: 2px; }
 
 @media (max-width: 560px) {
   .day { grid-template-columns: 1fr; gap: 4px; }
@@ -118,6 +123,8 @@ footer a { color: var(--accent); }
   .chips { flex: 1 1 100%; order: -1; }
   .rail-end { flex: 1 1 auto; justify-content: space-between; }
   .chip, .reset, .field input, .field select { min-height: 44px; }
+  .count { flex: 1 1 auto; min-width: 0; text-align: left; line-height: 1.25; }
+  .count .hidden-note { white-space: nowrap; font-size: .78rem; }
   .stamp .wd, .stamp .dm, .stamp .yr { display: inline; }
   .stamp .dm { font-size: 2.1rem; margin-left: 8px; }
   .stamp .yr { margin-left: 6px; }
