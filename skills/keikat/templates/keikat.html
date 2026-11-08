@@ -52,11 +52,12 @@ h1 .t2 { font-size: clamp(2rem, calc(100cqi / (var(--chars, 10) * .52)), 6rem); 
 .field { display: grid; gap: 4px; min-width: 0; }
 .field label, .check { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
 .field input, .field select { font: inherit; font-size: .95rem; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0; }
-#q { width: 14rem; max-width: 100%; }
+#q { width: 18rem; max-width: 100%; }
 #maxp { width: 6.5rem; }
 .check { display: flex; gap: 6px; align-items: center; padding-bottom: 8px; cursor: pointer; }
 .check input { accent-color: var(--accent); width: 1rem; height: 1rem; }
 .check[hidden] { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .count { font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
 .count .hidden-note { display: block; font-size: .82rem; }
 .reset { font: inherit; font-size: .9rem; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; cursor: pointer; }
@@ -133,18 +134,18 @@ footer a { color: var(--accent); }
 
   <form class="filters" id="filters" autocomplete="off">
     <div class="field">
-      <label for="q">Hae artistia, paikkaa tai päivää</label>
-      <input id="q" type="search" placeholder="esim. artisti, 14.11. tai joulukuu">
+      <label for="q">Haku</label>
+      <input id="q" type="search" placeholder="artisti, paikka, 14.11. tai joulukuu">
     </div>
     <div class="field">
       <label for="venue">Paikka</label>
       <select id="venue"><option value="">Kaikki paikat</option></select>
     </div>
     <div class="field">
-      <label for="maxp">Enintään €</label>
+      <label for="maxp">Hinta enintään (€)</label>
       <input id="maxp" type="number" min="0" step="1" inputmode="numeric" placeholder="ei rajaa">
     </div>
-    <label class="check" for="unpriced" hidden><input id="unpriced" type="checkbox"> Näytä myös hinnattomat</label>
+    <label class="check" for="unpriced" hidden><input id="unpriced" type="checkbox"> Näytä myös ilman hintaa</label>
     <label class="check" for="hidesold"><input id="hidesold" type="checkbox"> Piilota loppuunmyydyt</label>
   </form>
 
@@ -255,10 +256,19 @@ footer a { color: var(--accent); }
   if (m) $("title").append(el("span", "t1", m[1]));
   $("title").append(city);
   $("range").textContent = data.range || "";
-  $("generated").textContent = data.generated ? "Haettu " + data.generated : "";
+  $("generated").textContent = data.generated ? "Tiedot haettu " + data.generated : "";
 
   const venues = [...new Set(data.events.map((e) => e.venue).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fi"));
   for (const v of venues) { const o = el("option", null, v); o.value = v; $("venue").append(o); }
+
+  // "Liput", kun linkki vie lipunmyyjän tapahtumasivulle; muuten (paikan sivu, myyjän etusivu) "Lisätiedot".
+  const TICKET_HOSTS = /(^|\.)(tiketti\.fi|ticketmaster\.fi|lippu\.fi|eventim\.fi|fienta\.com|liveto\.io|lippupiste\.fi|holvi\.com|cluby\.com|seat4\.me|tickettailor\.com|eventual\.fi|tmtickets\.fi|jelmu\.net|biletti\.fi)$/i;
+  function linkKind(url) {
+    try {
+      const u = new URL(url);
+      return TICKET_HOSTS.test(u.hostname) && u.pathname.replace(/\/+$/, "") !== "" ? "Liput" : "Lisätiedot";
+    } catch (err) { return "Lisätiedot"; }
+  }
 
   // Pikavalinnat: tänään, lähin viikonloppu ja viikot (yli 8 viikon välillä kuukaudet).
   function isoWeek(dt) {
@@ -287,12 +297,19 @@ footer a { color: var(--accent); }
     for (const d of dates) {
       const dt = new Date(d + "T12:00");
       const key = byMonth ? d.slice(0, 7) : d.slice(0, 4) + "-w" + isoWeek(dt);
-      if (!groups.has(key)) groups.set(key, { label: byMonth ? MONTHS[dt.getMonth()] : "vk " + isoWeek(dt), date: d });
+      if (!groups.has(key)) groups.set(key, { label: byMonth ? MONTHS[dt.getMonth()] : "vk " + isoWeek(dt), date: d, first: d, last: d });
+      groups.get(key).last = d;
+    }
+    // Ruudunlukijalle koko kohde: "Siirry viikkoon 47, 16.–22.11." / "Siirry kuukauteen joulukuu".
+    for (const g of groups.values()) {
+      const a = parts(g.first), b = parts(g.last);
+      g.aria = byMonth ? "Siirry kuukauteen " + g.label : "Siirry viikkoon " + g.label.slice(3) + ", " + (g.first === g.last ? a.full : a.dm.replace(/\.\d+\.$/, ".") + "–" + b.full);
     }
     chips.push(...groups.values());
     $("chips").replaceChildren(...chips.map((c) => {
       const b = el("button", "chip" + (c.weekend ? " weekend" : ""), c.label);
       b.type = "button";
+      if (c.aria) b.setAttribute("aria-label", c.aria);
       b.addEventListener("click", () => jumpTo(c.date));
       return b;
     }));
@@ -314,7 +331,7 @@ footer a { color: var(--accent); }
       if (hideSold && e.status === "loppuunmyyty") return false;
       if (dq ? !covers(e, dq) : !words.every((w) => e._hay.includes(w))) return false;
       if (maxp != null) {
-        // Tuntematon hinta ei täytä hintarajaa, ellei käyttäjä erikseen halua nähdä hinnattomat.
+        // Tuntematon hinta ei täytä hintarajaa, ellei käyttäjä erikseen halua nähdä myös ne.
         if (e._min == null) { if (!showUnpriced) { unpricedHidden++; return false; } }
         else if (e._min > maxp) return false;
       }
@@ -329,7 +346,7 @@ footer a { color: var(--accent); }
     count.replaceChildren(filtered
       ? rows.length + " / " + plural(data.events.length, "keikka", "keikkaa")
       : "Kaikki " + plural(data.events.length, "keikka", "keikkaa"));
-    if (unpricedHidden) count.append(el("span", "hidden-note", plural(unpricedHidden, "hinnaton piilotettu", "hinnatonta piilotettu")));
+    if (unpricedHidden) count.append(el("span", "hidden-note", unpricedHidden + " ilman hintaa piilotettu"));
     if (!rows.length) renderChips([]);
     if (!data.events.length) {
       const box = el("div", "empty");
@@ -347,7 +364,7 @@ footer a { color: var(--accent); }
       btn.addEventListener("click", resetFilters);
       box.append(el("p", null, hint));
       if (unpricedHidden) {
-        const show = el("button", "reset", "Näytä hinnattomat (" + unpricedHidden + ")");
+        const show = el("button", "reset", "Näytä myös ilman hintaa (" + unpricedHidden + ")");
         show.type = "button";
         show.addEventListener("click", () => { $("unpriced").checked = true; render(); });
         box.append(show);
@@ -384,12 +401,20 @@ footer a { color: var(--accent); }
         const right = el("div", "right");
         const sp = shortPrice(e);
         const price = el("span", "price" + (sp.cls ? " " + sp.cls : ""), sp.text);
+        if (sp.cls === "unknown") { price.setAttribute("aria-hidden", "true"); }
         if (sp.title) price.title = sp.title;
         const hasPill = e.status in pillClass;
         if (hasPill) right.append(el("span", "pill " + pillClass[e.status], e.status));
         // Pillerin vieressä tuntematon hinta "–" on pelkkää kohinaa.
         if (!(hasPill && sp.cls === "unknown")) right.append(price);
-        if (e.url) { const a = el("a", "link", "Linkki"); a.href = e.url; a.target = "_blank"; a.rel = "noopener"; right.append(a); }
+        if (sp.cls === "unknown") right.append(el("span", "sr-only", "hinta ei tiedossa"));
+        if (e.url) {
+          const kind = linkKind(e.url);
+          const a = el("a", "link", kind);
+          a.href = e.url; a.target = "_blank"; a.rel = "noopener";
+          a.setAttribute("aria-label", kind + ": " + e.artist + ", " + (e.venue ? e.venue + " " : "") + p.full + " (avautuu uuteen välilehteen)");
+          right.append(a);
+        }
         g.append(left, right);
         if (e.note) g.append(el("div", "note", e.note));
         box.append(g);
