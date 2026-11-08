@@ -2,7 +2,7 @@
 """Hakee Oulun keikkapaikkojen omat ohjelmasivut (Tarkastamo, Tullisali, Tuba) tavallisella HTTP-haulla.
 
 Kaikilla kolmella sivulla ohjelma ja hinnat ovat valmiina HTML:ssä, joten selainta ei tarvita.
-Tuloste on JSON (oletus) tai taulukko (--table), samoilla kentillä kuin tiketti_oulu.py
+Tuloste on JSON (oletus) tai taulukko (--table), samoilla kentillä kuin tiketti.py
 sekä lisäksi "price" ja "category". Sivu, joka ei vastaa, raportoidaan stderriin ja ohitetaan.
 
 Käyttö:

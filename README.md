@@ -6,15 +6,22 @@ Suomalaisiin palveluihin ja paikkakuntiin liittyviä skillejä [Claude Codelle](
 
 | Skilli | Kuvaus |
 |---|---|
-| [keikat](skills/keikat/SKILL.md) | Oulun musiikkikeikat yhdeksi listaksi hintoineen ja lipputilanteineen, terminaaliin ja suodatettavalle web-sivulle. |
+| [keikat](skills/keikat/SKILL.md) | Suomen 17 suurimman kaupungin musiikkikeikat yhdeksi listaksi hintoineen ja lipputilanteineen, terminaaliin ja suodatettavalle web-sivulle. |
 
 ### keikat
 
 ```
-/keikat          # kuukausi tästä päivästä
-/keikat 3kk      # 1–12 kuukautta
+/keikat          # Oulun keikat, kuukausi tästä päivästä
+/keikat 3kk      # Oulun keikat, 1–12 kuukautta
 /keikat joulukuussa
+/keikat Tampere  # Tampereen keikat
+/keikat Helsinki 3kk
+/keikat joulukuussa Turussa
 ```
+
+Ilman kaupunkia haetaan Oulun keikat. Kaupunki voi olla missä kohtaa komentoa tahansa.
+
+Tuetut kaupungit: Helsinki, Espoo, Vantaa, Tampere, Turku, Oulu, Jyväskylä, Kuopio, Lahti, Pori, Kouvola, Joensuu, Lappeenranta, Hämeenlinna, Vaasa, Seinäjoki ja Rovaniemi.
 
 Skilli kokoaa keikat useasta lähteestä, yhdistää kaksoiskappaleet ja jättää pois muut kuin musiikkitapahtumat. Tulos tulee taulukkona terminaaliin ja julkaistaan web-sivuna (claude.ai-artifact), jolla on haku artistin, paikan ja päivän mukaan, paikkasuodatin, hintaraja ja loppuunmyytyjen piilotus.
 
@@ -22,11 +29,11 @@ Lähteet:
 
 | Lähde | Miten | Hinnat |
 |---|---|---|
-| Tiketti | skripti (`tiketti_oulu.py`) | ei, tila kyllä |
-| Tarkastamo, Tullisali, Tuba | skripti (`paikat_oulu.py`) | kyllä |
-| Oulu Sinfonia | skripti (`paikat_oulu.py`) | kyllä |
-| Oulun musiikkikeskus (Madetojan sali, Pohjankartanon sali ym.) | skripti (`paikat_oulu.py`) | ei |
-| Songkick, muut lipunmyyjät, pienet paikat, kaupungin kalenterit | Claude hakee verkosta | vaihtelee |
+| Tiketti | skripti (`tiketti.py`, kaikki kaupungit) | ei, tila kyllä |
+| Tarkastamo, Tullisali, Tuba | skripti (`paikat_oulu.py`, vain Oulu) | kyllä |
+| Oulu Sinfonia | skripti (`paikat_oulu.py`, vain Oulu) | kyllä |
+| Oulun musiikkikeskus (Madetojan sali, Pohjankartanon sali ym.) | skripti (`paikat_oulu.py`, vain Oulu) | ei |
+| Songkick, keikkapaikat, lipunmyyjät, kaupunkien kalenterit | kaupungin tiedosto `cities/<kaupunki>.md`, luetaan verkkohaulla | vaihtelee |
 
 Skilli toimii ilman selainta. Skriptit käyttävät tavallista HTTP-hakua, ja sivu tehdään valmiista pohjasta (`templates/keikat.html`) skriptillä `sivu.py`.
 
@@ -42,9 +49,11 @@ ln -s "$PWD/suomi-skills/skills/keikat" ~/.claude/skills/keikat
 Skriptit tarvitsevat vain Python 3:n standardikirjaston. Niitä voi ajaa myös suoraan:
 
 ```bash
-python3 skills/keikat/scripts/paikat_oulu.py --months 3 --table
-python3 skills/keikat/scripts/tiketti_oulu.py --months 3 --table
+python3 skills/keikat/scripts/paikat_oulu.py --months 3 --table   # vain Oulu
+python3 skills/keikat/scripts/tiketti.py --city Tampere --months 3 --table
 ```
+
+`paikat_oulu.py` on vain Oulua varten. `tiketti.py` ottaa kaupungin valinnalla `--city`.
 
 ## Rakenne
 
@@ -52,6 +61,7 @@ python3 skills/keikat/scripts/tiketti_oulu.py --months 3 --table
 skills/
 └── keikat/
     ├── SKILL.md            # ohjeet Claudelle
+    ├── cities/             # kaupunkikohtaiset lähteet
     ├── scripts/            # tiedonhaku ja sivun teko
     └── templates/          # web-sivun pohja
 ```

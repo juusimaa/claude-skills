@@ -3,9 +3,10 @@
 
 Tuloste on JSON (oletus) tai taulukko (--table). Data sisältää päivän, paikan, loppuunmyynti-
 tilan ja vapaiden lippujen määrän, mutta EI hintoja: hinnat haetaan tapahtumasivulta erikseen.
+Kaupunkiin kuuluvat myös siihen liitettyjen kuntien nimet (ALIASES), esim. Kouvola -> Kuusankoski.
 
 Käyttö:
-    python3 -I tiketti_oulu.py [--city Oulu] [--days 60 | --months 1-12] [--table]
+    python3 -I tiketti.py [--city Oulu] [--days 60 | --months 1-12] [--table]
 """
 import argparse
 import datetime as dt
@@ -17,6 +18,19 @@ import urllib.request
 
 BASE = "https://www.tiketti.fi"
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+# Tiketti kirjaa osan tapahtumista kaupunkiin liitetyn entisen kunnan nimelle.
+ALIASES = {
+    "Kouvola": ["Kuusankoski", "Valkeala", "Anjala", "Elimäki"],
+    "Seinäjoki": ["Nurmo", "Peräseinäjoki", "Ylistaro"],
+    "Hämeenlinna": ["Hauho", "Lammi", "Tuulos", "Kalvola"],
+    "Oulu": ["Haukipudas", "Kiiminki", "Yli-Ii", "Oulunsalo"],
+    "Kuopio": ["Nilsiä", "Vehmersalmi", "Karttula"],
+    "Lappeenranta": ["Joutseno", "Ylämaa"],
+    "Pori": ["Noormarkku", "Ahlainen"],
+    "Joensuu": ["Kiihtelysvaara", "Eno", "Pyhäselkä"],
+    "Jyväskylä": ["Korpilahti"],
+    "Lahti": ["Nastola"],
+}
 
 
 def fetch(url: str) -> str:
@@ -28,16 +42,21 @@ def fetch(url: str) -> str:
         return r.read().decode("utf-8", "replace")
 
 
+def needles(city: str):
+    """Kaupungin ja sen aliasten hakuavaimet; data kirjoittaa ääkköset sekä suoraan että \\u-muodossa."""
+    for name in [city] + ALIASES.get(city, []):
+        escaped = json.dumps(name)  # Seinäjoki -> "Sein\u00e4joki"
+        for form in {f'"{name}"', escaped}:
+            yield f'"location_city":{form}'
+
+
 def objects_for_city(html: str, city: str):
-    """Poimii kaikki JSON-oliot, joissa location_city on annettu kaupunki."""
-    needle = f'"location_city":"{city}"'
+    """Poimii kaikki JSON-oliot, joissa location_city on annettu kaupunki tai sen alias."""
     seen = set()
-    pos = 0
-    while True:
-        i = html.find(needle, pos)
-        if i < 0:
-            return
-        pos = i + len(needle)
+    hits = sorted(
+        (m.start(), len(n)) for n in needles(city) for m in re.finditer(re.escape(n), html)
+    )
+    for i, _ in hits:
         depth, s = 0, i
         while s > 0:
             c = html[s]
