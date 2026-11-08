@@ -1,0 +1,217 @@
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: keikkajulisteen tiivis päivämäärälista. Päiväotsikko vasemmalla, keikat oikealla, suodatinrivi ylhäällä. */
+:root {
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --fg: #16202b;
+  --muted: #5b6875;
+  --line: #d9e0e6;
+  --accent: #1d5d8a;
+  --sold: #b3261e;
+  --low: #8a5a00;
+  --free: #1f6b3a;
+  --chip: #e6edf3;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Source Sans 3", -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151b; --surface: #161e26; --fg: #e4eaf0; --muted: #94a3b1; --line: #26313c;
+    --accent: #7db7e3; --sold: #ff8a80; --low: #f0b54a; --free: #6fcf8f; --chip: #1f2a35;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #161e26; --fg: #e4eaf0; --muted: #94a3b1; --line: #26313c;
+  --accent: #7db7e3; --sold: #ff8a80; --low: #f0b54a; --free: #6fcf8f; --chip: #1f2a35;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 22px; }
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2.2rem, 6vw, 3.2rem); line-height: 1; margin: 0; letter-spacing: .01em; text-transform: uppercase; text-wrap: balance; }
+.range { font-family: var(--display); font-weight: 500; font-size: 1.35rem; color: var(--accent); letter-spacing: .04em; text-transform: uppercase; }
+.meta { color: var(--muted); font-size: .92rem; margin: 0; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label, .check { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.field input, .field select { font: inherit; font-size: .95rem; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0; }
+#q { width: 14rem; max-width: 100%; }
+#maxp { width: 6.5rem; }
+.check { display: flex; gap: 6px; align-items: center; padding-bottom: 8px; cursor: pointer; }
+.check input { accent-color: var(--accent); width: 1rem; height: 1rem; }
+.count { margin-left: auto; padding-bottom: 8px; font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.day { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0 18px; border-top: 2px solid var(--fg); padding-top: 10px; }
+.stamp { font-family: var(--display); line-height: 1; }
+.stamp .wd { display: block; font-size: 1rem; font-weight: 500; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+.stamp .dm { display: block; font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.gigs { display: grid; min-width: 0; }
+.gig { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.gig:last-child { border-bottom: 0; }
+.artist { font-weight: 600; font-size: 1.05rem; overflow-wrap: anywhere; }
+.where { color: var(--muted); font-size: .92rem; overflow-wrap: anywhere; }
+.right { display: grid; justify-items: end; align-content: start; gap: 4px; text-align: right; }
+.price { font-variant-numeric: tabular-nums; font-size: .95rem; }
+.pill { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+.pill.sold { color: var(--sold); background: color-mix(in srgb, var(--sold) 14%, transparent); }
+.pill.low { color: var(--low); background: color-mix(in srgb, var(--low) 16%, transparent); }
+.pill.free { color: var(--free); background: color-mix(in srgb, var(--free) 15%, transparent); }
+.link { color: var(--accent); font-weight: 600; font-size: .92rem; text-decoration: none; }
+.link:hover { text-decoration: underline; }
+.note { grid-column: 1 / -1; font-size: .85rem; color: var(--muted); }
+.gig.is-sold .artist { text-decoration: line-through; text-decoration-color: var(--sold); text-decoration-thickness: 1px; }
+
+.empty { color: var(--muted); padding: 24px 0; border-top: 2px solid var(--fg); }
+footer { color: var(--muted); font-size: .88rem; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
+footer p { margin: 0; max-width: 70ch; }
+footer a { color: var(--accent); }
+
+@media (max-width: 560px) {
+  .day { grid-template-columns: 1fr; gap: 4px; }
+  .stamp .wd, .stamp .dm { display: inline; }
+  .stamp .dm { font-size: 1.6rem; margin-left: 6px; }
+  .gig { grid-template-columns: 1fr; }
+  .right { justify-items: start; text-align: left; grid-auto-flow: column; justify-content: start; align-items: center; gap: 10px; }
+  .count { margin-left: 0; width: 100%; }
+  #q { width: 100%; }
+  .filters .field:first-child { flex: 1 1 100%; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 id="title"></h1>
+    <div class="range" id="range"></div>
+    <p class="meta" id="generated"></p>
+  </header>
+
+  <form class="filters" id="filters" autocomplete="off">
+    <div class="field">
+      <label for="q">Hae artistia tai paikkaa</label>
+      <input id="q" type="search" placeholder="esim. Tuba">
+    </div>
+    <div class="field">
+      <label for="venue">Paikka</label>
+      <select id="venue"><option value="">Kaikki paikat</option></select>
+    </div>
+    <div class="field">
+      <label for="maxp">Enintään €</label>
+      <input id="maxp" type="number" min="0" step="1" inputmode="numeric" placeholder="ei rajaa">
+    </div>
+    <label class="check" for="hidesold"><input id="hidesold" type="checkbox"> Piilota loppuunmyydyt</label>
+    <div class="count" id="count" aria-live="polite"></div>
+  </form>
+
+  <main id="list"></main>
+
+  <footer id="footer"></footer>
+</div>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById("data").textContent);
+  const WD = ["su", "ma", "ti", "ke", "to", "pe", "la"];
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const thisYear = new Date().getFullYear();
+
+  function parts(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return { wd: WD[dt.getDay()], dm: d + "." + m + "." + (y !== thisYear ? y : "") };
+  }
+  // Alin hinta vertailua varten: "alk. 33 €" -> 33, "79,90€ | VIP 99,90€" -> 79.9, "Ilmainen" -> 0.
+  function minPrice(e) {
+    if (e.status === "ilmainen" || /ilmai/i.test(e.price || "")) return 0;
+    const m = (e.price || "").match(/\d+(?:[.,]\d+)?/);
+    return m ? parseFloat(m[0].replace(",", ".")) : null;
+  }
+  const pillClass = { "loppuunmyyty": "sold", "vähissä": "low", "ilmainen": "free" };
+
+  $("title").textContent = data.title || "Keikat";
+  $("range").textContent = data.range || "";
+  $("generated").textContent = data.generated ? "Haettu " + data.generated : "";
+
+  const venues = [...new Set(data.events.map((e) => e.venue).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fi"));
+  for (const v of venues) { const o = el("option", null, v); o.value = v; $("venue").append(o); }
+
+  function render() {
+    const q = $("q").value.trim().toLowerCase();
+    const venue = $("venue").value;
+    const maxp = $("maxp").value === "" ? null : Number($("maxp").value);
+    const hideSold = $("hidesold").checked;
+    const rows = data.events.filter((e) => {
+      if (venue && e.venue !== venue) return false;
+      if (hideSold && e.status === "loppuunmyyty") return false;
+      if (q && !((e.artist + " " + e.venue).toLowerCase().includes(q))) return false;
+      if (maxp != null) { const p = minPrice(e); if (p != null && p > maxp) return false; }
+      return true;
+    });
+
+    const list = $("list");
+    list.replaceChildren();
+    $("count").textContent = rows.length + " / " + data.events.length + " keikkaa";
+    if (!rows.length) { list.append(el("p", "empty", "Mikään keikka ei vastaa suodattimia. Tyhjennä haku tai nosta hintarajaa.")); return; }
+
+    const byDay = new Map();
+    for (const e of rows) { if (!byDay.has(e.date)) byDay.set(e.date, []); byDay.get(e.date).push(e); }
+    const frag = document.createDocumentFragment();
+    for (const [date, gigs] of byDay) {
+      const p = parts(date);
+      const day = el("section", "day");
+      const stamp = el("div", "stamp");
+      stamp.append(el("span", "wd", p.wd), el("span", "dm", p.dm));
+      const box = el("div", "gigs");
+      for (const e of gigs) {
+        const g = el("article", "gig" + (e.status === "loppuunmyyty" ? " is-sold" : ""));
+        const left = el("div");
+        left.append(el("div", "artist", e.artist));
+        let where = e.venue || "";
+        if (e.end) { const pe = parts(e.end); where += (where ? " · " : "") + "jatkuu " + pe.wd + " " + pe.dm; }
+        if (e.time) where += (where ? " · " : "") + e.time;
+        left.append(el("div", "where", where));
+        const right = el("div", "right");
+        right.append(el("span", "price", e.price || "–"));
+        if (e.status) right.append(el("span", "pill " + (pillClass[e.status] || ""), e.status));
+        if (e.url) { const a = el("a", "link", "Linkki"); a.href = e.url; a.target = "_blank"; a.rel = "noopener"; right.append(a); }
+        g.append(left, right);
+        if (e.note) g.append(el("div", "note", e.note));
+        box.append(g);
+      }
+      day.append(stamp, box);
+      frag.append(day);
+    }
+    list.append(frag);
+  }
+
+  const f = $("footer");
+  for (const n of data.notes || []) f.append(el("p", null, n));
+  if ((data.sources || []).length) {
+    const p = el("p", null, "Lähteet: ");
+    data.sources.forEach((s, i) => {
+      if (i) p.append(", ");
+      if (s.url) { const a = el("a", null, s.name); a.href = s.url; a.target = "_blank"; a.rel = "noopener"; p.append(a); }
+      else p.append(s.name);
+    });
+    f.append(p);
+  }
+
+  $("filters").addEventListener("submit", (ev) => ev.preventDefault());
+  for (const id of ["q", "venue", "maxp", "hidesold"]) $(id).addEventListener("input", render);
+  render();
+})();
+</script>

@@ -85,6 +85,23 @@ Säännöt:
 - Taulukon jälkeen **yksi rivi**: montako keikkaa löytyi ja mitkä lähteet tuottivat tuloksia. Jos jokin lähde ei toiminut, sano se.
 - Älä lisää arvosteluja tai suosituksia, ellei käyttäjä pyydä. Voit tarjota suodatusta (genre, hinta) seuraavaksi.
 
+### 6. Julkaise web-sivuna
+
+Tee samasta listasta web-sivu, jolla on suodattimet (haku, paikka, hintaraja, loppuunmyytyjen piilotus) ja klikattavat Linkki-painikkeet. Sivun ulkoasu on valmiina tiedostossa `templates/keikat.html`, joten älä suunnittele sivua itse.
+
+1. Kirjoita lista JSON-tiedostoksi scratchpad-kansioon (esim. `keikat.json`). Muoto on kuvattu skriptin `scripts/sivu.py` alussa:
+   - `title`: `Keikat <kaupunki>ssa`, esim. `Keikat Oulussa`.
+   - `range`: haettu aikaväli, esim. `8.11.–8.12.2026`. `generated`: tämä päivä.
+   - `events`: samat keikat kuin taulukossa. `date` muodossa `2026-11-14`, monipäiväisille lisäksi `end`. `price` ja `status` samoin kuin taulukossa, `url` täytenä osoitteena tai tyhjä. Alaviitteen sisältö (esim. epävarma loppuunmyynti) kenttään `note`.
+   - `notes`: taulukon jälkeinen yhteenvetorivi ja maininta siitä, että lista ei ole täydellinen.
+   - `sources`: lähteet, jotka tuottivat tuloksia, muodossa `{"name", "url"}`.
+2. Aja `python3 -I <tämän skillin kansio>/scripts/sivu.py <keikat.json> <keikat.html>`. Molemmat tiedostot tulevat scratchpad-kansioon.
+3. Julkaise HTML Artifact-työkalulla. Pidä yksi pysyvä linkki:
+   - Jos tässä keskustelussa on jo julkaistu keikkasivu, julkaise sama tiedostopolku uudelleen.
+   - Muuten hae käyttäjän artifactit (`action: "list"`). Jos sieltä löytyy saman kaupungin keikkasivu (esim. otsikko `Keikat Oulussa`), lue se (`action: "read"`) ja julkaise uusi versio sen `url`:iin.
+   - Muuten julkaise uutena: `icon: "music"`, `description` esim. "Oulun musiikkikeikat 8.11.–8.12.2026 hintoineen ja suodattimineen."
+4. Anna linkki taulukon ja yhteenvetorivin jälkeen yhdellä rivillä. Jos julkaisu ei onnistu, kerro se ja jätä terminaalin taulukko vastaukseksi.
+
 ## Totuudenmukaisuus
 
 - Kerro puuttuvat tiedot puuttuviksi. Parempi `–` kuin keksitty hinta.
