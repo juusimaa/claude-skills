@@ -6,7 +6,7 @@ Suomalaisiin palveluihin ja paikkakuntiin liittyviä skillejä [Claude Codelle](
 
 | Skilli | Kuvaus |
 |---|---|
-| [keikat](skills/keikat/SKILL.md) | Hakee lähiaikojen musiikkikeikat Oulusta (Tiketti, Tarkastamo, Tullisali, Tuba, Songkick ym.) taulukoksi hintoineen ja loppuunmyyntitietoineen. Kutsu: `/keikat`. |
+| [keikat](skills/keikat/SKILL.md) | Hakee lähiaikojen musiikkikeikat Oulusta (Tiketti, Tarkastamo, Tullisali, Tuba, Songkick ym.) taulukoksi hintoineen ja loppuunmyyntitietoineen. Kutsu: `/keikat` (1 kk) tai esim. `/keikat 3kk` (1–12 kk). |
 
 ## Asennus
 

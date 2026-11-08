@@ -1,6 +1,7 @@
 ---
 name: keikat
 description: Hakee lähiaikojen musiikkikeikat Oulusta (isot ja pienet, myös baarikeikat) useista lähteistä ja listaa ne taulukkona päivämäärän, artistin, paikan, lippujen hinnan ja loppuunmyynti-tilan kanssa. Käytä kun käyttäjä kysyy "mitä keikkoja Oulussa", "keikat Oulussa tällä viikolla/kuussa", "onko Oulussa keikkaa X:llä" tai kutsuu /keikat.
+argument-hint: "[1kk–12kk]"
 ---
 
 # Keikat Oulussa
@@ -11,7 +12,11 @@ Tuota ajantasainen, yhdistetty lista Oulun musiikkikeikoista. Vastaa suomeksi.
 
 Poimi käyttäjän pyynnöstä, muuten käytä oletuksia:
 
-- **Aikaväli**: oletus seuraavat 30 päivää alkaen tänään. "Tällä viikolla", "joulukuussa" jne. tulkitaan sen mukaan.
+- **Aikaväli**: oletus 1 kuukausi tästä päivästä eteenpäin. Komennon argumentti on: `$ARGUMENTS`
+  - Muoto `Nkk` (myös `N kk`, `N kuukautta`, pelkkä luku `N`), jossa N on 1–12: hae N kalenterikuukautta tästä päivästä eteenpäin. Esim. 8.11. ja `3kk` → 8.11.–8.2.
+  - Jos N on yli 12, käytä 12 ja kerro siitä yhdellä lauseella. Jos argumentti on tyhjä, käytä 1 kuukautta.
+  - Vapaa aikaväli kuten "tällä viikolla" tai "joulukuussa" tulkitaan sellaisenaan, ja skripteille annetaan `--days`, joka kattaa välin loppuun asti.
+  - Pitkillä väleillä lista harvenee loppua kohti, koska pienet paikat julkaisevat ohjelmansa vain muutaman viikon päähän. Mainitse tämä yhdellä lauseella, kun väli on yli 3 kk.
 - **Genre / artisti**: suodata, jos käyttäjä mainitsee.
 - **Maksimihinta**: suodata, jos käyttäjä mainitsee. Ilmaiset keikat (0 €) kuuluvat aina mukaan.
 - **Piilota loppuunmyydyt**: oletuksena näytä ne, merkitse selvästi.
@@ -23,11 +28,11 @@ Kaikki vaiheet toimivat ilman selainta: skriptit käyttävät tavallista HTTP-ha
 ### 1. Skriptit (luotettavimmat, aja aina ensin ja rinnakkain)
 
 ```bash
-python3 -I <tämän skillin kansio>/scripts/tiketti_oulu.py --days 30 --table
-python3 -I <tämän skillin kansio>/scripts/paikat_oulu.py --days 30 --table
+python3 -I <tämän skillin kansio>/scripts/tiketti_oulu.py --months N --table
+python3 -I <tämän skillin kansio>/scripts/paikat_oulu.py --months N --table
 ```
 
-`--days` vastaa haettua aikaväliä. Ilman `--table` tuloste on JSON.
+`N` on aikavälin kuukausimäärä (1–12). Vapaalle aikavälille käytä `--months`-valinnan tilalla `--days`. Ilman `--table` tuloste on JSON.
 
 **tiketti_oulu.py** lukee Tiketin etusivun upotetun tapahtumadatan. Se palauttaa päivän, artistin, paikan, ovien ajan, tilan (`saatavilla` / `vähissä` / `loppuunmyyty` / `peruttu`) ja linkin, kun linkki löytyy.
 - Etusivulla on vain osa Tiketin tapahtumista, joten lista ei ole täydellinen.
@@ -38,6 +43,7 @@ python3 -I <tämän skillin kansio>/scripts/paikat_oulu.py --days 30 --table
 - **Tarkastamo** (Torinranta): hinta on sivun tekstinä (esim. "34,90€ | VIP 44,90€"). Ovelta peritään lisäksi palvelumaksu 4 €, ja ovilippu on 5 € ennakkoa kalliimpi. Kategoriaa ei ole, joten jätä pois muut kuin musiikkitapahtumat itse (esim. taikashow).
 - **Tullisali** (Tyrnäväntie 16): kentässä `category` on sivun kategoria. Ota mukaan vain `Musiikki`. Hinta on alin hinta, joten merkitse se muodossa `alk. 33 €`. Ostolinkki (Ticketmaster) on kentässä `tickets_url`.
 - **Tuba**: hinta on muodossa "Liput ennakkoon 20 €, ovelta 24 €". Linkki vie yleensä Tiketin tapahtumaan, joten **tästä saa hinnat Tuban Tiketti-keikoille**. Jätä pois brunssit, visat ja muut kuin keikat.
+- **Oulu Sinfonia** (oulusinfonia.fi/kaikki-konsertit): Madetojan salin, Ouluhallin, Ravintola Preludin ja muiden paikkojen konsertit. Skripti hakee hinnan konsertin omalta sivulta (esim. "42 € perushinta / 32 € eläkeläinen / 22 € opiskelija…"). Taulukkoon riittää perushinta, esim. `42 € (alennus 22–32 €)`. Kategoria `Vapaa pääsy` tarkoittaa ilmaista. Monipäiväisillä on kenttä `end` ja `time_info` kertoo näytösten määrän. Lista ulottuu yleensä vain muutaman kuukauden päähän.
 
 `status` on `loppuunmyyty`, jos hintatekstissä lukee "sold out" tai "loppuunmyyty". Tarkista teksti: esim. "VIP 44,90€ (sold out)" voi tarkoittaa, että vain VIP-liput on myyty loppuun. Kerro tällainen epävarmuus alaviitteessä. Jos skripti kertoo stderrissä, että lähde epäonnistui tai palautti nollan tapahtumaa, mainitse se lopuksi, ja lue sivu tarvittaessa web-fetch-agentilla.
 
@@ -45,9 +51,10 @@ python3 -I <tämän skillin kansio>/scripts/paikat_oulu.py --days 30 --table
 
 Aja nämä rinnakkain WebSearchilla ja web-fetch-agentilla. Anna agentille kaikki osoitteet yhdellä kertaa ja pyydä tiivis lista (päivä, artisti, paikka, hinta, tila, osoite). Hae aina haetulle aikavälille, ja mainitse hakulauseessa kuukausi ja vuosi.
 
-- **Songkick** (paras kokoava lähde): https://www.songkick.com/metro-areas/28832-finland-oulu/this-month ja seuraava kuukausi muodossa `.../december-2026`. Lue web-fetch-agentilla, koska suora HTTP-haku palauttaa virheen 406. Hintoja ja tilaa ei ole.
+- **Songkick** (paras kokoava lähde): https://www.songkick.com/metro-areas/28832-finland-oulu/this-month sekä jokainen muu aikavälin kuukausi muodossa `.../december-2026` (kuukauden englanninkielinen nimi pienellä). Lue web-fetch-agentilla, koska suora HTTP-haku palauttaa virheen 406. Hintoja ja tilaa ei ole.
 - **Muut lipunmyyjät**: Lippu.fi / Ticketmaster (Oulun Energia Areena, Ouluhalli, Madetojan sali), Eventim, Fienta.
-- **Pienet paikat ja baarit**: etsi paikkojen omat ohjelmasivut ja sosiaalinen media. Tarkista ainakin Tukikohta, 45 Special, Club Teatria, RioLive, Sauna Oulu, Oulun Tapahtumat Oy ja Oulun musiikkikeskus. Lisää paikkoja löytyy hakemalla "keikkapaikat Oulu". Etsi nykyinen osoite hakukoneella äläkä oleta vanhoja osoitteita: tukikohta.org on eri järjestö, ja clubteatria.fi ja 45special.com eivät aina vastaa.
+- **Pienet paikat ja baarit**: etsi paikkojen omat ohjelmasivut ja sosiaalinen media. Tarkista ainakin Tukikohta, 45 Special, Club Teatria, RioLive, Sauna Oulu ja Oulun Tapahtumat Oy. Lisää paikkoja löytyy hakemalla "keikkapaikat Oulu". Etsi nykyinen osoite hakukoneella äläkä oleta vanhoja osoitteita: tukikohta.org on eri järjestö, ja clubteatria.fi ja 45special.com eivät aina vastaa.
+- **Oulun musiikkikeskus** (Madetojan sali, Pohjankartanon sali): oma kalenteri https://www.oulunmusiikkikeskus.fi/tapahtumakalenteri.html on JavaScript-upotus (tapahtumat.munoulu.fi), eikä sitä voi lukea ilman selainta. Oulu Sinfonian konsertit tulevat skriptistä. Muut viihdetapahtumat (esim. ABBA-show't, joiden liput myy Lippu.fi) haetaan WebSearchilla: "Madetojan sali <kuukausi> <vuosi>" ja "Oulun musiikkikeskus lippu.fi".
 - **Kaupungin kalenterit**: visitoulu.fi/fi/tapahtumat (sisältö latautuu JavaScriptillä, joten käytä hakua), ouka.fi/oulu/tapahtumat, oulu2026.eu/program (Oulu on Euroopan kulttuuripääkaupunki 2026, mukana paljon ilmaisia keikkoja).
 - **Ilmaiset ja pienet keikat**: Kaleva ja Oulun Ylioppilaslehti listaavat usein viikon keikat.
 

@@ -5,7 +5,7 @@ Tuloste on JSON (oletus) tai taulukko (--table). Data sisältää päivän, paik
 tilan ja vapaiden lippujen määrän, mutta EI hintoja: hinnat haetaan tapahtumasivulta erikseen.
 
 Käyttö:
-    python3 -I tiketti_oulu.py [--city Oulu] [--days 60] [--table]
+    python3 -I tiketti_oulu.py [--city Oulu] [--days 60 | --months 1-12] [--table]
 """
 import argparse
 import datetime as dt
@@ -67,10 +67,21 @@ def objects_for_city(html: str, city: str):
             yield obj
 
 
+def add_months(d: dt.date, n: int) -> dt.date:
+    """Sama päivä n kuukautta myöhemmin; lyhyemmässä kuussa kuun viimeinen päivä."""
+    y, m = divmod(d.month - 1 + n, 12)
+    y, m = d.year + y, m + 1
+    nxt = dt.date(y + (m == 12), m % 12 + 1, 1)
+    return min(d.replace(year=y, month=m, day=1) + dt.timedelta(days=d.day - 1), nxt - dt.timedelta(days=1))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--city", default="Oulu")
-    ap.add_argument("--days", type=int, default=60, help="kuinka monta päivää eteenpäin")
+    span = ap.add_mutually_exclusive_group()
+    span.add_argument("--days", type=int, default=60, help="kuinka monta päivää eteenpäin")
+    span.add_argument("--months", type=int, choices=range(1, 13), metavar="1-12",
+                      help="kuinka monta kalenterikuukautta eteenpäin (ohittaa --days)")
     ap.add_argument("--table", action="store_true")
     a = ap.parse_args()
 
@@ -80,7 +91,7 @@ def main() -> int:
         slugs[m.group(2)] = BASE + m.group(1)
 
     today = dt.date.today()
-    limit = today + dt.timedelta(days=a.days)
+    limit = add_months(today, a.months) if a.months else today + dt.timedelta(days=a.days)
     out = []
     for o in objects_for_city(html, a.city):
         try:

@@ -6,7 +6,7 @@ Tuloste on JSON (oletus) tai taulukko (--table), samoilla kentillä kuin tiketti
 sekä lisäksi "price" ja "category". Sivu, joka ei vastaa, raportoidaan stderriin ja ohitetaan.
 
 Käyttö:
-    python3 -I paikat_oulu.py [--days 30] [--only tarkastamo,tullisali,tuba] [--table]
+    python3 -I paikat_oulu.py [--days 30 | --months 1-12] [--only tarkastamo,tullisali,tuba] [--table]
 """
 import argparse
 import datetime as dt
@@ -126,18 +126,81 @@ def tuba(today):
                     time_info=f"klo {tm.group(1)}" if tm else "", source="tuba.fi")
 
 
-SOURCES = {"tarkastamo": tarkastamo, "tullisali": tullisali, "tuba": tuba}
+def sinfonia(today):
+    # Oulun musiikkikeskuksen oma kalenteri on JavaScript-upotus, mutta Oulu Sinfonian
+    # konserttilista on tavallista HTML:ää. Hinnat ovat vain konserttien omilla sivuilla.
+    page = fetch("https://oulusinfonia.fi/kaikki-konsertit/")
+    for flyer in page.split('<div class="col-6 flyer-frame')[1:]:
+        cat = re.search(r'<div class="kategoria">(.*?)</div>', flyer, re.S)
+        cat = text(cat.group(1)) if cat else ""
+        single = re.search(r'class="paivamaara">.*?<span>(\d{1,2})\.(\d{1,2})\.(\d{4})</span>', flyer, re.S)
+        span = re.search(r'(\d{1,2})\.(\d{1,2})\.\s*-\s*(\d{1,2})\.(\d{1,2})\.(\d{4})', text(flyer))
+        if single:
+            start, end = dt.date(int(single.group(3)), int(single.group(2)), int(single.group(1))), None
+        elif span:
+            y = int(span.group(5))
+            end = dt.date(y, int(span.group(4)), int(span.group(3)))
+            sm = int(span.group(2))
+            start = dt.date(y - 1 if sm > end.month else y, sm, int(span.group(1)))
+        else:
+            continue
+        title = re.search(r"<h3>(.*?)</h3>", flyer, re.S)
+        if not title:
+            continue
+        who = re.search(r"<!-- Esiintyjät -->\s*<p>(.*?)</p>", flyer, re.S)
+        place = re.search(r'class="konserttipaikka">(.*?)</p>', flyer, re.S)
+        tm = re.search(r'class="kellonaika">.*?([\d.]+)\s*</p>', flyer, re.S)
+        shows = re.search(r"(\d+) näytöstä", text(flyer))
+        link = re.search(r'class="liput-link[^"]*" href="([^"]+)"', flyer)
+        artist = text(title.group(1)) + (f" ({text(who.group(1))})" if who and text(who.group(1)) else "")
+        e = event(start, artist, text(place.group(1)) if place else "", "", link.group(1) if link else "",
+                  category=cat, time_info=f"klo {tm.group(1)}" if tm else (f"{shows.group(1)} näytöstä" if shows else ""),
+                  source="oulusinfonia.fi")
+        e["end"] = end.isoformat() if end else ""
+        if cat.lower() == "vapaa pääsy":
+            e["price"], e["status"] = "Ilmainen", "ilmainen"
+        yield e
+
+
+def sinfonia_prices(events, limit):
+    """Hakee hinnan konserttisivulta vain aikavälin konserteille (ensimmäinen €-rivi)."""
+    for e in events:
+        if e["source"] != "oulusinfonia.fi" or e["price"] or not e["url"] or e["date"] > limit.isoformat():
+            continue
+        try:
+            body = re.sub(r"(?s)<(script|style).*?</\1>", "", fetch(e["url"]))
+        except Exception:
+            continue
+        lines = [text(l) for l in re.split(r"<(?:/p|br\s*/?|/h\d|/li)>", body)]
+        price = next((l for l in lines if "€" in l and len(l) < 200 and not l.lower().startswith("erikseen")), "")
+        e["price"] = re.sub(r"^Liput\s+", "", price)
+        if re.search(r"vapaa pääsy|ilmainen sisäänpääsy", e["price"], re.I):
+            e["status"] = "ilmainen"
+
+
+SOURCES = {"tarkastamo": tarkastamo, "tullisali": tullisali, "tuba": tuba, "sinfonia": sinfonia}
+
+
+def add_months(d: dt.date, n: int) -> dt.date:
+    """Sama päivä n kuukautta myöhemmin; lyhyemmässä kuussa kuun viimeinen päivä."""
+    y, m = divmod(d.month - 1 + n, 12)
+    y, m = d.year + y, m + 1
+    nxt = dt.date(y + (m == 12), m % 12 + 1, 1)
+    return min(d.replace(year=y, month=m, day=1) + dt.timedelta(days=d.day - 1), nxt - dt.timedelta(days=1))
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--days", type=int, default=60, help="kuinka monta päivää eteenpäin")
+    span = ap.add_mutually_exclusive_group()
+    span.add_argument("--days", type=int, default=60, help="kuinka monta päivää eteenpäin")
+    span.add_argument("--months", type=int, choices=range(1, 13), metavar="1-12",
+                      help="kuinka monta kalenterikuukautta eteenpäin (ohittaa --days)")
     ap.add_argument("--only", default=",".join(SOURCES), help="pilkuin eroteltu lista lähteistä")
     ap.add_argument("--table", action="store_true")
     a = ap.parse_args()
 
     today = dt.date.today()
-    limit = today + dt.timedelta(days=a.days)
+    limit = add_months(today, a.months) if a.months else today + dt.timedelta(days=a.days)
     out = []
     for name in a.only.split(","):
         try:
@@ -147,7 +210,9 @@ def main() -> int:
             continue
         if not events:
             print(f"{name}: ei tapahtumia, sivun rakenne on ehkä muuttunut", file=sys.stderr)
-        out += [e for e in events if today.isoformat() <= e["date"] <= limit.isoformat()]
+        # Monipäiväinen tapahtuma kuuluu mukaan, jos se on vielä käynnissä.
+        out += [e for e in events if today.isoformat() <= (e.get("end") or e["date"]) and e["date"] <= limit.isoformat()]
+    sinfonia_prices(out, limit)
     out.sort(key=lambda x: (x["date"], x["venue"], x["artist"]))
 
     if a.table:
