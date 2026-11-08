@@ -38,7 +38,7 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 28px 48px;
 }
-.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 22px; }
+.wrap { max-width: 920px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 /* Julisteyläosa: kaupunki täydellä voimalla, päivät korostusvärillä, paksu painoviiva alla. */
 header { display: grid; gap: 10px; padding-bottom: 16px; border-bottom: 6px solid var(--fg); container-type: inline-size; }
 h1 { font-family: var(--display); font-weight: 700; margin: 0; text-transform: uppercase; display: grid; }
@@ -57,16 +57,27 @@ h1 .t2 { font-size: clamp(2rem, calc(100cqi / (var(--chars, 10) * .52)), 6rem); 
 .check { display: flex; gap: 6px; align-items: center; padding-bottom: 8px; cursor: pointer; }
 .check input { accent-color: var(--accent); width: 1rem; height: 1rem; }
 .check[hidden] { display: none; }
-.count { margin-left: auto; padding-bottom: 8px; font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.count { font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
 .count .hidden-note { display: block; font-size: .82rem; }
 .reset { font: inherit; font-size: .9rem; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; cursor: pointer; }
 .reset:hover { border-color: var(--accent); }
 .reset[hidden] { display: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.day { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0 18px; border-top: 3px solid var(--fg); padding-top: 12px; }
+/* Suunnistuspalkki: pysyy ylhäällä koko listan ajan. Päiväleimat tarttuvat sen alareunaan (--rail-h). */
+.rail { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px 12px; padding: 10px 0; background: var(--bg); border-bottom: 1px solid var(--line); }
+.chips { display: flex; gap: 6px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { font-family: var(--display); font-weight: 700; font-size: 1rem; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; min-height: 36px; cursor: pointer; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.weekend { color: var(--accent); }
+.rail-end { display: flex; align-items: center; gap: 10px; flex: none; }
+.day { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0 18px; border-top: 3px solid var(--fg); padding-top: 12px; scroll-margin-top: calc(var(--rail-h, 0px) + 8px); }
+h2.stamp { margin: 0; font-size: inherit; }
+h2.stamp:focus { outline: none; }
+h2.stamp:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 /* Päiväleima pysyy näkyvissä koko päivän keikkojen ajan. */
-.stamp { font-family: var(--display); line-height: 1; min-width: 0; position: sticky; top: 12px; align-self: start; }
+.stamp { font-family: var(--display); line-height: 1; min-width: 0; position: sticky; top: calc(var(--rail-h, 0px) + 12px); align-self: start; }
 .stamp .wd { display: block; font-size: 1.05rem; font-weight: 700; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
 .stamp .dm { display: block; font-size: 2.7rem; font-weight: 700; line-height: .9; letter-spacing: -.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 /* Perjantai ja lauantai ovat keikkailtoja: niiden päivä painetaan korostusvärillä. */
@@ -99,13 +110,15 @@ footer a { color: var(--accent); }
 
 @media (max-width: 560px) {
   .day { grid-template-columns: 1fr; gap: 4px; }
-  .stamp { top: 0; z-index: 1; background: var(--bg); padding: 6px 0; margin-top: -6px; }
+  .stamp { top: var(--rail-h, 0px); z-index: 1; background: var(--bg); padding: 8px 0 6px; margin-top: -8px; line-height: 1.15; }
+  .rail { flex-wrap: wrap; }
+  .chips { flex: 1 1 100%; order: -1; }
+  .rail-end { flex: 1 1 auto; justify-content: space-between; }
   .stamp .wd, .stamp .dm, .stamp .yr { display: inline; }
   .stamp .dm { font-size: 2.1rem; margin-left: 8px; }
   .stamp .yr { margin-left: 6px; }
   .gig { grid-template-columns: 1fr; }
   .right { justify-content: start; text-align: left; }
-  .count { margin-left: 0; width: 100%; }
   #q { width: 100%; }
   .filters .field:first-child { flex: 1 1 100%; }
 }
@@ -133,9 +146,16 @@ footer a { color: var(--accent); }
     </div>
     <label class="check" for="unpriced" hidden><input id="unpriced" type="checkbox"> Näytä myös hinnattomat</label>
     <label class="check" for="hidesold"><input id="hidesold" type="checkbox"> Piilota loppuunmyydyt</label>
-    <button class="reset" id="clear" type="button" hidden>Tyhjennä</button>
-    <div class="count" id="count" aria-live="polite"></div>
   </form>
+
+  <nav class="rail" id="rail" aria-label="Siirry päivään">
+    <div class="chips" id="chips"></div>
+    <div class="rail-end">
+      <div class="count" id="count" aria-live="polite"></div>
+      <button class="reset" id="clear" type="button" hidden>Tyhjennä</button>
+      <button class="reset" id="totop" type="button">Suodattimet</button>
+    </div>
+  </nav>
 
   <main id="list"></main>
 
@@ -240,6 +260,44 @@ footer a { color: var(--accent); }
   const venues = [...new Set(data.events.map((e) => e.venue).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fi"));
   for (const v of venues) { const o = el("option", null, v); o.value = v; $("venue").append(o); }
 
+  // Pikavalinnat: tänään, lähin viikonloppu ja viikot (yli 8 viikon välillä kuukaudet).
+  function isoWeek(dt) {
+    const d = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
+    const day = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - day);
+    const start = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil(((d - start) / 864e5 + 1) / 7);
+  }
+  const localIso = (dt) => dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0") + "-" + String(dt.getDate()).padStart(2, "0");
+  function jumpTo(date) {
+    const day = document.getElementById("d-" + date);
+    if (!day) return;
+    day.scrollIntoView({ block: "start" });
+    day.querySelector(".stamp").focus({ preventScroll: true });
+  }
+  function renderChips(dates) {
+    const chips = [];
+    const today = localIso(new Date());
+    if (dates.includes(today)) chips.push({ label: "Tänään", date: today });
+    const wk = dates.find((d) => [5, 6, 0].includes(new Date(d + "T12:00").getDay()));
+    if (wk && wk !== today) chips.push({ label: "Viikonloppu", date: wk, weekend: true });
+    const groups = new Map();
+    const weeks = new Set(dates.map((d) => isoWeek(new Date(d + "T12:00")) + "/" + d.slice(0, 4)));
+    const byMonth = weeks.size > 8;
+    for (const d of dates) {
+      const dt = new Date(d + "T12:00");
+      const key = byMonth ? d.slice(0, 7) : d.slice(0, 4) + "-w" + isoWeek(dt);
+      if (!groups.has(key)) groups.set(key, { label: byMonth ? MONTHS[dt.getMonth()] : "vk " + isoWeek(dt), date: d });
+    }
+    chips.push(...groups.values());
+    $("chips").replaceChildren(...chips.map((c) => {
+      const b = el("button", "chip" + (c.weekend ? " weekend" : ""), c.label);
+      b.type = "button";
+      b.addEventListener("click", () => jumpTo(c.date));
+      return b;
+    }));
+  }
+
   function render() {
     const q = $("q").value.trim().toLowerCase();
     const venue = $("venue").value;
@@ -272,6 +330,7 @@ footer a { color: var(--accent); }
       ? rows.length + " / " + plural(data.events.length, "keikka", "keikkaa")
       : "Kaikki " + plural(data.events.length, "keikka", "keikkaa"));
     if (unpricedHidden) count.append(el("span", "hidden-note", plural(unpricedHidden, "hinnaton piilotettu", "hinnatonta piilotettu")));
+    if (!rows.length) renderChips([]);
     if (!data.events.length) {
       const box = el("div", "empty");
       box.append(el("p", null, "Tältä aikaväliltä ei löytynyt keikkoja."));
@@ -300,6 +359,7 @@ footer a { color: var(--accent); }
 
     const byDay = new Map();
     for (const e of rows) { if (!byDay.has(e.date)) byDay.set(e.date, []); byDay.get(e.date).push(e); }
+    renderChips([...byDay.keys()]);
     const frag = document.createDocumentFragment();
     let lastYear = thisYear;
     for (const [date, gigs] of byDay) {
@@ -307,7 +367,9 @@ footer a { color: var(--accent); }
       const y = +date.slice(0, 4);
       if (y !== lastYear) { frag.append(el("div", "year-break", String(y))); lastYear = y; }
       const day = el("section", "day");
-      const stamp = el("div", "stamp" + (p.wd === "pe" || p.wd === "la" ? " weekend" : ""));
+      const stamp = el("h2", "stamp" + (p.wd === "pe" || p.wd === "la" ? " weekend" : ""));
+      day.id = "d-" + date;
+      stamp.tabIndex = -1;
       stamp.append(el("span", "wd", p.wd), el("span", "dm", p.dm));
       if (p.yr) stamp.append(el("span", "yr", p.yr));
       const box = el("div", "gigs");
@@ -356,6 +418,14 @@ footer a { color: var(--accent); }
     $("q").focus();
   }
   $("clear").addEventListener("click", resetFilters);
+  $("totop").addEventListener("click", () => {
+    $("filters").scrollIntoView({ block: "start" });
+    $("q").focus({ preventScroll: true });
+  });
+  // Palkin korkeus vaihtelee (rivitys mobiilissa), joten päiväleimojen tarttumakohta seuraa sitä.
+  const setRail = () => document.documentElement.style.setProperty("--rail-h", $("rail").offsetHeight + "px");
+  if ("ResizeObserver" in window) new ResizeObserver(setRail).observe($("rail"));
+  setRail();
   $("filters").addEventListener("submit", (ev) => ev.preventDefault());
   for (const id of ["q", "venue", "maxp", "unpriced", "hidesold"]) $(id).addEventListener("input", render);
   render();
