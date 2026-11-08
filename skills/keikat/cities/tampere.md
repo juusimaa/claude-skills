@@ -2,7 +2,14 @@
 
 ## Skriptit
 
-Vain `tiketti.py --city Tampere`. Tiketin etusivulla on noin 172 tapahtumaa, joten Tampereella Tiketti kattaa suurimman osan keikoista (Tavara-asema, Tullikamari, Telakka, Vastavirta).
+`tiketti.py --city Tampere` ja `paikat_tampere.py` rinnakkain. Tiketin etusivulla on noin 172 tapahtumaa, joten Tampereella Tiketti kattaa suurimman osan keikoista (Tavara-asema, Tullikamari, Telakka, Vastavirta).
+
+`paikat_tampere.py` lukee neljän paikan omat ohjelmasivut tavallisella HTTP-haulla (`--only tullikamari,tavara,telakka,vastavirta`). Tullikamarin ja Tavara-aseman rivit tuovat hinnan samoille keikoille, jotka Tiketti listaa ilman hintaa.
+
+- `tullikamari` (tullikamari.fi/ohjelma/): koko ohjelma yhdellä sivulla ilman sivutusta, myös Pakkahuone ja Klubi (venue-kenttä). Hinta on tekstinä, esim. "alk. 20€ / Ovelta 25€" tai pelkkä "Ovelta 8€"; ilmainen on "Ilmainen"; loppuunmyyty näkyy hintana "Loppuunmyyty". `category` on Konsertti/keikka, Yökerho tai Muu julkinen tapahtuma. `time_info` sisältää ovet ja pääesiintyjän alkamisajan. Suodata pois Yökerho-rivit (DJ-illat) ja Muu julkinen tapahtuma (esim. vapaaehtoismessut); Pakkahuoneen "Tanssit"-torstait ovat kategoriassa Konsertti/keikka, joten ne pitää tunnistaa nimestä. Yhdellä rivillä (Tarja Turunen 23.2.2027) sali puuttuu sivulta, joten venue on "Tullikamari" eikä ovia ole.
+- `tavara` (tavara-asema.fi/ohjelma/): sama sivupohja ja hintamuoto kuin Tullikamarilla, sali on aina "Tavara-asema". Mukana arkipäivien "Päivähypyt"-päivätanssit (ovelta 12 €), disco- ja klubi-illat sekä Orion-tyyppiset yötapahtumat; suodata nimestä. Päivässä ei ole vuotta, se luetaan linkin lopusta.
+- `telakka` (telakka.eu/ohjelma/): vapaamuotoinen tekstisivu. Hinta on esim. "15 €", "Ilmainen" (Vapaa pääsy) tai "Loppuunmyyty"; linkki on Tiketin sivu, jos sellainen on, muuten ohjelmasivu. Vuotta ei kerrota, vaan se päätellään (vuosi vaihtuu omalla "2027"-rivillä). Telakan 2. kerroksen tapahtumat (runoilta, päivätanssit) ovat venue-kentässä "Telakka (2. kerros)". Mukana puheohjelmaa, jameja ja DJ-iltoja; suodata nimestä.
+- `vastavirta` (vastavirta.net): etusivun tapahtumalohkot. Hinta on esim. "10 €", "15 € / 18 €" tai "Ilmainen"; jos sivulla lukee vain "Liput: €", price on tyhjä. Venue on "Vastavirta-Klubi (alakerta)" tai "Terassi Pub Yläkerta". Nimi sisältää usein bändien soittoajat suluissa. Linkki on Facebook-tapahtuma tai etusivu; ennakkolippujen osoite on kentässä `tickets_url`. Tietovisat ja DJ-illat ovat mukana, suodata nimestä.
 
 ## Songkick
 
@@ -14,15 +21,15 @@ Metroalue on kattava vain isoille keikoille (etusivulla noin 36 tapahtumaa, 13.1
 
 | Paikka | Ohjelmasivu | Lipunmyynti | Huomiot |
 |---|---|---|---|
-| Tavara-asema | https://tavara-asema.fi/ohjelma/ | Tiketti | hintaa ei ole sivulla, vain "Liput"-linkki; muuta kuin musiikkia on vähän (kirpputori, pakohuone) |
-| Pakkahuone (Tullikamari) | https://tullikamari.fi/tapahtumat/ | Tiketti | sama sivu kattaa Pakkahuoneen ja Klubin; hinta näkyy tekstinä (esim. "alk. 20 €", "ovelta 25 €"); sivulla myös tansseja ja vapaaehtoismessut |
-| Klubi (Tullikamari) | https://tullikamari.fi/tapahtumat/ | Tiketti | pienempi sali, sama ohjelmasivu kuin Pakkahuoneella; loppuunmyynti merkitty "Sold out" |
+| Tavara-asema | https://tavara-asema.fi/ohjelma/ | Tiketti | hintaa ei ole sivulla, vain "Liput"-linkki; muuta kuin musiikkia on vähän (kirpputori, pakohuone); skripti |
+| Pakkahuone (Tullikamari) | https://tullikamari.fi/tapahtumat/ | Tiketti | sama sivu kattaa Pakkahuoneen ja Klubin; hinta näkyy tekstinä (esim. "alk. 20 €", "ovelta 25 €"); sivulla myös tansseja ja vapaaehtoismessut; skripti |
+| Klubi (Tullikamari) | https://tullikamari.fi/tapahtumat/ | Tiketti | pienempi sali, sama ohjelmasivu kuin Pakkahuoneella; loppuunmyynti merkitty "Sold out"; skripti |
 | Nokia Arena | https://www.nokiaarena.fi/tapahtumat | Lippu.fi | iso osa on urheilua (Tappara, salibandy, taitoluistelu), suodata; hintaa ei näy |
 | Tampere-talo | https://www.tampere-talo.fi/tapahtumat/ | ei tiedossa | ohjelma latautuu JavaScriptillä, käytä hakua; mukana ooppera, baletti ja komiikka |
 | Tampere Filharmonia (Tampere-talo) | https://www.tamperefilharmonia.fi/konsertit/ | oma (Liput ja hinnat -sivu) | hintaa ei ole listassa; konsertit pääosin Tampere-talossa |
 | G Livelab Tampere | https://glivelab.fi/tampere/ | oma | pääosin keikkoja; hintaa ei näy, ostolinkki "Osta liput" tai "loppuunmyyty" |
-| Telakka | https://www.telakka.eu/ohjelma/ | Tiketti | hinta tekstinä tai "Vapaa pääsy"; mukana puheohjelmaa, runoilta, tanssit, jamit |
-| Vastavirta-klubi | https://vastavirta.net/ | Tiketti | hinta tekstinä, moni ilta ilmainen; mukana tietovisat ja DJ-illat (Terassi Pub Yläkerta) |
+| Telakka | https://www.telakka.eu/ohjelma/ | Tiketti | hinta tekstinä tai "Vapaa pääsy"; mukana puheohjelmaa, runoilta, tanssit, jamit; skripti |
+| Vastavirta-klubi | https://vastavirta.net/ | Tiketti | hinta tekstinä, moni ilta ilmainen; mukana tietovisat ja DJ-illat (Terassi Pub Yläkerta); skripti |
 | Bar Kotelo | https://barkotelo.fi/keikat/ | ovelta / Liveto | hinta tekstinä ("liput: 10 €"), ovelta lisäksi eteispalvelumaksu 3 € |
 | Hakametsän jäähalli | haku | ei tiedossa | isoja keikkoja, esim. Stratovarius 20.11.2026; urheilua suodatettava |
 | Olympia-kortteli | https://olympiakortteli.fi/keikat/ | Lippu.fi | SULJETTU 30.9.2026 alkaen, älä listaa keikkoja |

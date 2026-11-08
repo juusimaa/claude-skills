@@ -2,7 +2,15 @@
 
 ## Skriptit
 
-Vain `tiketti.py --city Jyväskylä`. Tiketin etusivulla on noin 21 tapahtumaa (Poppari, Taulumäen kirkko, Tapahtumakeskus Helmi ja Villa Rana, jossa on myös stand-upia), mutta Lutakko, Paviljonki ja useimmat klubit puuttuvat, joten omat ohjelmasivut ovat tärkeämpiä.
+`tiketti.py --city Jyväskylä` ja `paikat_jyvaskyla.py` rinnakkain. Tiketin etusivulla on noin 21 tapahtumaa (Poppari, Taulumäen kirkko, Tapahtumakeskus Helmi ja Villa Rana, jossa on myös stand-upia), mutta Lutakko, Paviljonki ja useimmat klubit puuttuvat, joten omat ohjelmasivut ovat tärkeämpiä.
+
+```bash
+python3 -I <skillin kansio>/scripts/paikat_jyvaskyla.py --months N --table
+```
+
+`paikat_jyvaskyla.py` lukee hintoineen kaksi omaa ohjelmasivua:
+- **Lutakko** (`--only lutakko`, jelmu.net): hinta on alin–ylin tekstinä (esim. "25,00€ – 33,00€"); merkitse se muodossa `25–33 €`. `status` on `loppuunmyyty`, kun sivulla lukee "Loppuunmyyty!". Kenttä `venue` on sivun oma paikka: Jelmun listalla on Lutakon lisäksi Musta Kynnyksen keikkoja. Skripti poistaa niiden kaksoiskappaleet `mustakynnys`-lähteestä saman linkin perusteella ja pitää Jelmun rivin. `time_info` sisältää ovet, alkamisajan (jos sellainen on) ja ikärajan. Päivässä ei ole vuotta, joten skripti arvaa sen. Esiintyjät ovat pilkulla eroteltuna. DJ-illat ovat musiikkia ja ne pidetään mukana.
+- **Musta Kynnys** (`--only mustakynnys`, mustakynnys.com): hinta on tekstinä "Ennakkoliput: 16/15€, Liput ovelta: 20€" (ennakkohinta/alennettu ja ovihinta). Tuntematon ovihinta ("?€") jätetään pois. `time_info` on "showtime 22.00". Linkki vie Jelmun lippukauppaan. Sivulla ei ole vuotta, joten skripti arvaa sen (yli kaksi kuukautta mennyt päivä tarkoittaa ensi vuotta). Sivulla on vain muutama seuraava keikka (bändi- ja DJ-iltoja), mutta kaikki kuuluvat mukaan.
 
 ## Songkick
 
@@ -12,10 +20,10 @@ https://www.songkick.com/metro-areas/56206-finland-jyvaskyla/this-month sekä mu
 
 | Paikka | Ohjelmasivu | Lipunmyynti | Huomiot |
 |---|---|---|---|
-| Tanssisali Lutakko | https://www.jelmu.net/ | Jelmu.net | hinta näkyy tekstinä (esim. "25,00€ – 33,00€", alin–ylin), "Loppuunmyyty!" tekstinä; yli 40 tulevaa keikkaa, vain musiikkia (myös DJ-iltoja). lutakko.fi näyttää vain viisi seuraavaa |
+| Tanssisali Lutakko | https://www.jelmu.net/ | Jelmu.net | skripti; hinta näkyy tekstinä (esim. "25,00€ – 33,00€", alin–ylin), "Loppuunmyyty!" tekstinä; yli 40 tulevaa keikkaa, vain musiikkia (myös DJ-iltoja). lutakko.fi näyttää vain viisi seuraavaa |
 | Paviljonki | https://www.paviljonki.fi/tapahtumat-liput/ | Lippu.fi | hintaa ei näy sivulla, vain "Osta liput" -painike; mukana messuja, teatteria, stand-upia ja showta, joten suodata sivun kategorialla Konsertit; Jyväskylä Sinfonian konsertteja myös |
 | Jyväskylä Sinfonia | https://www.jyvaskylasinfonia.fi/konsertit | Lippu.fi, jyvaskylasinfonia.lippu.fi, Jyväskylä-piste (Asemakatu 7) | hintaa ei sivulla; konserttipaikat vaihtelevat; lista kattaa vain muutaman viikon |
-| Musta Kynnys | https://mustakynnys.com/ | Jelmu.net | ennakko- ja ovihinta tekstinä (esim. "16/15€" ja ovelta 20 €); vain bändi- ja DJ-iltoja; päivämäärissä ei vuotta |
+| Musta Kynnys | https://mustakynnys.com/ | Jelmu.net | skripti; ennakko- ja ovihinta tekstinä (esim. "16/15€" ja ovelta 20 €); vain bändi- ja DJ-iltoja; päivämäärissä ei vuotta |
 | Poppari | ei omaa sivua tarkistettu (ravintolapoppari.fi, varmennevirhe) | Tiketti | keikat löytyvät Tiketistä; mm. jazzia ja tribuuttikeikkoja |
 | Club Escape | https://escapejkl.fi/tapahtumat/ | ei tiedossa | hintoja ei näy; "ESC Live" -keikkojen seassa klubi-iltoja ja bileitä; päivämäärissä ei vuotta |
 | London | https://londonjkl.fi/tapahtumat/ | Lippu.fi | hinta joskus tekstinä, usein ei; sivulla enimmäkseen DJ-/diskoiltoja ja coverbändejä, erota keikat niistä; ei vuotta |

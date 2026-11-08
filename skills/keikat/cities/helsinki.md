@@ -2,7 +2,7 @@
 
 ## Skriptit
 
-Vain `tiketti.py --city Helsinki`. Tiketin etusivulla on Helsingille nyt noin 316 tapahtumaa, joten kattavuus on hyvä, mutta mukana on myös muuta kuin musiikkia. Isojen areenoiden ja Musiikkitalon keikat myydään pääosin muualla (Lippu.fi, Ticketmaster, omat sivut), joten täydennä niistä hakua ja paikkojen omia sivuja käyttäen.
+`tiketti.py --city Helsinki` ja `linkedevents.py --city Helsinki` rinnakkain. Linked Events tuottaa paljon kirjastojen, kirkkojen ja seniorikeskusten ilmaiskonsertteja ja jonkin verran klubikeikkoja (Tavastia, Musiikkitalo), mutta hinta puuttuu usein; testissä noin 158 tapahtumaa kuukaudessa. Tiketin etusivulla on Helsingille noin 316 tapahtumaa, joten kattavuus on hyvä, mutta mukana on myös muuta kuin musiikkia. Isojen areenoiden ja Musiikkitalon keikat myydään pääosin muualla (Lippu.fi, Ticketmaster, omat sivut), joten täydennä niistä hakua ja paikkojen omia sivuja käyttäen.
 
 ## Songkick
 
@@ -43,10 +43,7 @@ Tiketti (tiketti.fi, pienet ja keskikokoiset klubit), Lippu.fi (Eventim, eventim
 
 - https://tapahtumat.hel.fi/fi: sisältö latautuu JavaScriptillä, joten käytä rajapintaa tai hakua.
 - https://www.myhelsinki.fi/fi/nae-ja-koe/tapahtumat: palauttaa 403 curlille, WebFetchillä tapahtumat eivät lataudu (JavaScript). Käytä hakua.
-- Linked Events -rajapinta (avoin, ei avainta): https://api.hel.fi/linkedevents/v1/event/?start=<alku>&end=<loppu>&keyword=yso:p11185&division=helsinki&sort=start_time&include=location&page_size=50 (`<alku>` ja `<loppu>` muodossa `2026-11-08`)
-  - `yso:p11185` on avainsana "konsertit" (`yso:p27962` elävä musiikki, mutta sillä tulee vain muutama). Vastaus on JSON: `name.fi`, `start_time`, `location.name.fi`, `offers[].price.fi` (hinta puuttuu usein).
-  - Mukana on paljon kirjastojen, kirkkojen ja seniorikeskusten ilmaiskonsertteja. Kaupallisia klubeja on vähän, mutta esim. Tavastia löytyy paikkana: `&location=tprek:20566`.
-  - `start`/`end` palauttavat myös jo käynnissä olevat pitkät tapahtumat (listassa voi olla elokuun alkaneita), joten suodata `start_time` >= tänään. `starts_after` ei toimi (400). Sivutus: `meta.next`.
+- Linked Events: avoin rajapinta, katso `linkedevents.py` (avainsanat, sivutus ja pitkien tapahtumien suodatus siinä).
 
 ## Paikallismedia
 

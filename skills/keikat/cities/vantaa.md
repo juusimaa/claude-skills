@@ -2,7 +2,7 @@
 
 ## Skriptit
 
-Vain `tiketti.py --city Vantaa`. Tiketin etusivulla on Vantaalle nyt noin 29 tapahtumaa, joten kattavuus on kohtalainen. Täydennä Martinuksen, Myyrmäen ja Tikkurilan paikoilla.
+`tiketti.py --city Vantaa` ja `linkedevents.py --city Vantaa` rinnakkain. Linked Events tuottaa Vantaalta vähän, lähinnä kirkkojen ja kirjastojen konsertteja; testissä 3 tapahtumaa kuukaudessa, hinta puuttuu usein. Tiketin etusivulla on Vantaalle nyt noin 29 tapahtumaa, joten kattavuus on kohtalainen. Täydennä Martinuksen, Myyrmäen ja Tikkurilan paikoilla.
 
 ## Songkick
 
@@ -31,7 +31,7 @@ Lippu.fi (Martinus, isot keikat), Ticketmaster, Tiketti (Tiketin ~29 tapahtumaa)
 - https://tapahtumat.vantaa.fi/fi-FI: kaupungin kalenteri, lataus tilapäisesti estetty tilitiedotteella eikä HTML:ssä näy tapahtumia (JavaScript). Musiikkisuodatin: https://tapahtumat.vantaa.fi/fi-FI/topic/5cbf089897e55c2ebb856c39?mode=event&count=9 ("Musiikki, keikat ja klubit"), sisältöä ei saatu luettua.
 - https://www.vantaa.fi/fi/ajankohtaista/tapahtumat: lähinnä tapahtumauutisia, varsinainen kalenteri on tapahtumat.vantaa.fi.
 - https://visit.vantaa.fi/fi: etusivu vastaa, tapahtumalinkki ohjautuu vantaa.fi:n sivulle.
-- Linked Events: https://api.hel.fi/linkedevents/v1/event/?start=<alku>&end=<loppu>&keyword=yso:p11185&division=vantaa&sort=start_time&include=location&page_size=50. Kattavuus on heikko: marraskuussa 2026 vain neljä tulosta (kirkkokonsertteja ja kirjastoja). `starts_after` ei toimi (400).
+- Linked Events: katso `linkedevents.py --city Vantaa`.
 
 ## Paikallismedia
 

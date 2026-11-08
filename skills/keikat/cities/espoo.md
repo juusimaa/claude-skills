@@ -2,7 +2,7 @@
 
 ## Skriptit
 
-Vain `tiketti.py --city Espoo`. Tiketin etusivulla on Espoolle nyt vain noin 8 tapahtumaa, joten kattavuus on heikko ja loput pitää hakea paikkojen omilta sivuilta ja Songkickista.
+`tiketti.py --city Espoo` ja `linkedevents.py --city Espoo` rinnakkain. Linked Events tuottaa Espoosta vähän: testissä vain 2 tapahtumaa kuukaudessa (Hybridiarena Hype), kulttuurikeskuksen tapahtumat puuttuvat. Tiketin etusivulla on Espoolle nyt vain noin 8 tapahtumaa, joten kattavuus on heikko ja loput pitää hakea paikkojen omilta sivuilta ja Songkickista.
 
 ## Songkick
 
@@ -30,7 +30,7 @@ Lippu.fi ja Ticketmaster (Kulttuurikeskus, Metro Areena, Hype), kaupungin omat s
 
 - https://www.espoo.fi/fi/tapahtumat-espoossa: kaupungin kalenteri, sisältö latautuu JavaScriptillä (HTML:ssä ei tapahtumia). Yksittäisten tapahtumien osoite on muotoa `https://www.espoo.fi/fi/tapahtumat/espooevents:<id>`.
 - https://www.visitespoo.fi/: etusivu vastaa, tapahtumasivun osoitetta ei löytynyt (`/fi/tapahtumat` palauttaa 404).
-- Linked Events: https://api.hel.fi/linkedevents/v1/event/?start=<alku>&end=<loppu>&keyword=yso:p11185&division=espoo&sort=start_time&include=location&page_size=50. Kattavuus on heikko: marraskuussa 2026 vain kolme tulosta, ja kulttuurikeskuksen tapahtumat puuttuvat. `starts_after` ei toimi (400).
+- Linked Events: katso `linkedevents.py --city Espoo`.
 
 ## Paikallismedia
 

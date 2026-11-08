@@ -33,6 +33,9 @@ Lähteet:
 | Tarkastamo, Tullisali, Tuba | skripti (`paikat_oulu.py`, vain Oulu) | kyllä |
 | Oulu Sinfonia | skripti (`paikat_oulu.py`, vain Oulu) | kyllä |
 | Oulun musiikkikeskus (Madetojan sali, Pohjankartanon sali ym.) | skripti (`paikat_oulu.py`, vain Oulu) | ei |
+| Tullikamari (Pakkahuone, Klubi), Tavara-asema, Telakka, Vastavirta | skripti (`paikat_tampere.py`, vain Tampere) | kyllä |
+| Lutakko (Jelmu), Musta Kynnys | skripti (`paikat_jyvaskyla.py`, vain Jyväskylä) | kyllä |
+| Linked Events (Helsingin seudun avoin tapahtumarajapinta) | skripti (`linkedevents.py`, Helsinki, Espoo, Vantaa) | osin |
 | Songkick, keikkapaikat, lipunmyyjät, kaupunkien kalenterit | kaupungin tiedosto `cities/<kaupunki>.md`, luetaan verkkohaulla | vaihtelee |
 
 Skilli toimii ilman selainta. Skriptit käyttävät tavallista HTTP-hakua, ja sivu tehdään valmiista pohjasta (`templates/keikat.html`) skriptillä `sivu.py`.
@@ -50,10 +53,13 @@ Skriptit tarvitsevat vain Python 3:n standardikirjaston. Niitä voi ajaa myös s
 
 ```bash
 python3 skills/keikat/scripts/paikat_oulu.py --months 3 --table   # vain Oulu
+python3 skills/keikat/scripts/paikat_tampere.py --months 3 --table
+python3 skills/keikat/scripts/paikat_jyvaskyla.py --months 3 --table
+python3 skills/keikat/scripts/linkedevents.py --city Helsinki --months 1 --table
 python3 skills/keikat/scripts/tiketti.py --city Tampere --months 3 --table
 ```
 
-`paikat_oulu.py` on vain Oulua varten. `tiketti.py` ottaa kaupungin valinnalla `--city`.
+`paikat_<kaupunki>.py`-skriptit lukevat yhden kaupungin keikkapaikkoja. `tiketti.py` ja `linkedevents.py` ottavat kaupungin valinnalla `--city`.
 
 ## Rakenne
 

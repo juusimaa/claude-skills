@@ -56,7 +56,18 @@ Kaikki vaiheet toimivat ilman selainta: skriptit käyttävät tavallista HTTP-ha
 python3 -I <tämän skillin kansio>/scripts/tiketti.py --city <Kaupunki> --months N --table
 ```
 
-Aja samaan aikaan kaupungin tiedoston osiossa **Skriptit** mainitut skriptit, jos niitä on (nyt vain Oululla `paikat_oulu.py`). `<Kaupunki>` on taulukon `--city`-sarakkeen arvo ääkkösineen. `N` on aikavälin kuukausimäärä (1–12). Vapaalle aikavälille käytä `--months`-valinnan tilalla `--days`. Ilman `--table` tuloste on JSON.
+Aja samaan aikaan kaupungin tiedoston osiossa **Skriptit** mainitut skriptit, jos niitä on:
+
+| Kaupunki | Skripti | Lähteet |
+|---|---|---|
+| Oulu | `paikat_oulu.py --months N --table` | Tarkastamo, Tullisali, Tuba, Oulu Sinfonia, musiikkikeskus |
+| Tampere | `paikat_tampere.py --months N --table` | Tullikamari (Pakkahuone, Klubi), Tavara-asema, Telakka, Vastavirta |
+| Jyväskylä | `paikat_jyvaskyla.py --months N --table` | Lutakko (Jelmu), Musta Kynnys |
+| Helsinki, Espoo, Vantaa | `linkedevents.py --city <Kaupunki> --months N --table` | kaupunkien avoin tapahtumarajapinta |
+
+Paikkaskriptit palauttavat hinnan ja tilan, joten niiden rivit täydentävät samojen keikkojen Tiketti-rivejä. Kaikilla skripteillä on samat valinnat (`--days`/`--months`, `--table`) ja samat JSON-kentät kuin `paikat_oulu.py`:llä.
+
+`<Kaupunki>` on kohdan Tuetut kaupungit taulukon `--city`-sarakkeen arvo ääkkösineen. `N` on aikavälin kuukausimäärä (1–12). Vapaalle aikavälille käytä `--months`-valinnan tilalla `--days`. Ilman `--table` tuloste on JSON.
 
 **tiketti.py** lukee Tiketin etusivun upotetun tapahtumadatan. Se palauttaa päivän, artistin, paikan, ovien ajan, tilan (`saatavilla` / `vähissä` / `loppuunmyyty` / `peruttu`) ja linkin, kun linkki löytyy. Kaupunkiin luetaan myös siihen liitettyjen entisten kuntien tapahtumat (esim. Kouvolaan Kuusankoski).
 - Etusivulla on vain osa Tiketin tapahtumista, joten lista ei ole täydellinen.
