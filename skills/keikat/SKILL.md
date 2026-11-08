@@ -54,7 +54,10 @@ Kaikki vaiheet toimivat ilman selainta: skriptit käyttävät tavallista HTTP-ha
 
 ```bash
 python3 -I <tämän skillin kansio>/scripts/tiketti.py --city <Kaupunki> --months N --table
+python3 -I <tämän skillin kansio>/scripts/ticketmaster.py --city <Kaupunki> --months N --table
 ```
+
+Nämä kaksi ajetaan kaikissa kaupungeissa. Ticketmasterilla on kaupunkisivu vain Helsingille, Espoolle, Tampereelle, Turulle, Oululle, Kuopiolle, Lahdelle, Porille ja Seinäjoelle. Muissa `ticketmaster.py` palauttaa tyhjän listan, mikä ei ole virhe. Hae niiden Lippu.fi-tapahtumat vaiheessa 2.
 
 Aja samaan aikaan kaupungin tiedoston osiossa **Skriptit** mainitut skriptit, jos niitä on:
 
@@ -74,6 +77,8 @@ Paikkaskriptit palauttavat hinnan ja tilan, joten niiden rivit täydentävät sa
 - **Hintaa ei ole datassa**, ja tapahtumasivun hinnat latautuvat JavaScriptillä. Katso vaihe 3.
 - Älä arvaile Tiketin sisäisiä JSON-osoitteita (esim. api.tiketti.fi). Lue vain julkisia sivuja.
 
+**ticketmaster.py** lukee Ticketmasterin (sama myynti kuin Lippu.fi) kaupunkisivun `ticketmaster.fi/discover/<kaupunki>` upotetun tapahtumadatan. Siellä ovat isojen areenoiden, konserttitalojen ja kirkkokonserttien liput, joita Tiketissä ei ole. Hintaa ei ole datassa, mutta tila on (`saatavilla` / `vähissä` / `loppuunmyyty` / `peruttu`). Skripti pudottaa urheilun Ticketmasterin oman kategorian perusteella ja selvät ei-musiikkitapahtumat nimen perusteella (messut, työpajat, stand-up, teatteri). Mukaan jää silti teatteria ja stand-upia, joiden nimestä lajia ei näe, joten suodata vaiheen 4 mukaan. Sama tapahtuma voi tulla useana rivinä (VIP- ja aitiolippuvariantit), joten yhdistä ne. `--all` näyttää kaiken.
+
 Jos skripti kertoo stderrissä, että lähde epäonnistui tai palautti nollan tapahtumaa, mainitse se lopuksi, ja lue sivu tarvittaessa web-fetch-agentilla.
 
 ### 2. Täydennä muilla lähteillä
@@ -82,7 +87,8 @@ Käy läpi kaupungin tiedoston lähteet. Aja ne rinnakkain WebSearchilla ja web-
 
 - **Songkick** (paras kokoava lähde): kaupungin tiedoston osoite, `/this-month` sekä jokainen muu aikavälin kuukausi muodossa `.../december-2026` (kuukauden englanninkielinen nimi pienellä). Lue web-fetch-agentilla, koska suora HTTP-haku palauttaa virheen 406. Hintoja ja tilaa ei ole.
 - **Keikkapaikat**: kaupungin tiedoston taulukon ohjelmasivut. Lisää paikkoja löytyy hakemalla "keikkapaikat <kaupunki>". Etsi nykyinen osoite hakukoneella, jos tiedoston osoite ei vastaa.
-- **Muut lipunmyyjät**: kaupungin tiedoston osio **Lipunmyynti**. Yleisesti Lippu.fi / Ticketmaster, Eventim ja Fienta.
+- **Meteli.net** (suomalainen keikkakalenteri, myös pienet klubit), **Bandsintown** ja klubi- ja DJ-illoille **Resident Advisor** (ra.co/events/fi/<kaupunki>). Kaikki palauttavat suoralle HTTP-haulle virheen 403, joten lue ne web-fetch-agentilla tai hae WebSearchilla ("meteli.net <kaupunki> keikat"). Jos sivu ei aukea agentillekaan, jätä lähde pois ja mainitse se yhteenvedossa.
+- **Muut lipunmyyjät**: kaupungin tiedoston osio **Lipunmyynti**. Lippu.fi / Ticketmaster tulee jo skriptistä. Yleisesti lisäksi Eventim, Fienta ja Lippupiste.
 - **Kaupungin kalenterit** ja **paikallismedia**: kaupungin tiedoston osiot.
 
 Jos paikka tai lähde ei vastaa tai sivu on tyhjä, jätä se pois äläkä keksi tietoja.
@@ -100,7 +106,7 @@ Isoissa kaupungeissa (Helsinki, Tampere) keikkoja voi olla satoja. Hae silloin h
 
 ### 4. Yhdistä ja puhdista
 
-- Yhdistä saman keikan kaksoiskappaleet (sama artisti, päivä ja paikka eri lähteistä). Pidä lähteistä se, jossa on hinta ja tila, ja listaa muut lähteet linkkeinä.
+- Yhdistä saman keikan kaksoiskappaleet (sama artisti, päivä ja paikka eri lähteistä). Paikan nimi voi vaihdella lähteittäin (Ticketmaster: "Kalevan kirkko", Tiketti: "Kalevan kirkko, Tampere"), joten vertaa artistia ja päivää. Pidä lähteistä se, jossa on hinta ja tila, ja listaa muut lähteet linkkeinä.
 - Suodata pois muut kuin musiikkikeikat (teatteri, stand-up, urheilu, messut), ellei tapahtuma ole selvästi musiikkia (konsertti, festivaali, klubi-ilta).
 - Poista menneet ja perutut tapahtumat. Jos peruttu keikka olisi kiinnostava, mainitse se erikseen lopussa.
 - Poista muiden kaupunkien keikat, joita kokoavat lähteet (Songkick, lipunmyyjät) tuovat mukaan.

@@ -30,6 +30,8 @@ Lähteet:
 | Lähde | Miten | Hinnat |
 |---|---|---|
 | Tiketti | skripti (`tiketti.py`, kaikki kaupungit) | ei, tila kyllä |
+| Ticketmaster / Lippu.fi | skripti (`ticketmaster.py`, 9 kaupunkia, joilla Ticketmasterissa on kaupunkisivu) | ei, tila kyllä |
+| Meteli.net, Bandsintown, Resident Advisor | Claude lukee verkosta | ei |
 | Tarkastamo, Tullisali, Tuba | skripti (`paikat_oulu.py`, vain Oulu) | kyllä |
 | Oulu Sinfonia | skripti (`paikat_oulu.py`, vain Oulu) | kyllä |
 | Oulun musiikkikeskus (Madetojan sali, Pohjankartanon sali ym.) | skripti (`paikat_oulu.py`, vain Oulu) | ei |
@@ -57,9 +59,10 @@ python3 skills/keikat/scripts/paikat_tampere.py --months 3 --table
 python3 skills/keikat/scripts/paikat_jyvaskyla.py --months 3 --table
 python3 skills/keikat/scripts/linkedevents.py --city Helsinki --months 1 --table
 python3 skills/keikat/scripts/tiketti.py --city Tampere --months 3 --table
+python3 skills/keikat/scripts/ticketmaster.py --city Tampere --months 3 --table
 ```
 
-`paikat_<kaupunki>.py`-skriptit lukevat yhden kaupungin keikkapaikkoja. `tiketti.py` ja `linkedevents.py` ottavat kaupungin valinnalla `--city`.
+`paikat_<kaupunki>.py`-skriptit lukevat yhden kaupungin keikkapaikkoja. `tiketti.py`, `ticketmaster.py` ja `linkedevents.py` ottavat kaupungin valinnalla `--city`.
 
 ## Rakenne
 
