@@ -1,14 +1,39 @@
-# suomi-skills
+# claude-skills
 
-Suomalaisiin palveluihin ja paikkakuntiin liittyviä skillejä [Claude Codelle](https://claude.com/claude-code).
+Omia pluginejaan ja skilliään [Claude Codelle](https://claude.com/claude-code): koodausapuri ja suomalaisiin palveluihin ja paikkakuntiin liittyviä skillejä. Repo on samalla Claude Coden plugin-marketplace.
 
-## Skillit
+## Pluginit
 
-| Skilli | Kuvaus |
-|---|---|
-| [keikat](skills/keikat/SKILL.md) | Suomen 17 suurimman kaupungin musiikkikeikat yhdeksi listaksi hintoineen ja lipputilanteineen, terminaaliin ja suodatettavalle web-sivulle. |
+| Plugin | Kuvaus | Lisenssi |
+|---|---|---|
+| [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: istunnon malli suunnittelee tehtävän, ja Haiku- ja Sonnet-työntekijät toteuttavat osatehtävät rinnakkain. | Apache-2.0 |
+| [keikat](plugins/keikat/skills/keikat/SKILL.md) | `/keikat`: Suomen 17 suurimman kaupungin musiikkikeikat yhdeksi listaksi hintoineen ja lipputilanteineen, terminaaliin ja suodatettavalle web-sivulle. | Apache-2.0 |
 
-### keikat
+## Asennus
+
+Lisää marketplace ja asenna haluamasi plugin:
+
+```
+/plugin marketplace add juusimaa/suomi-skills
+/plugin install orchestrate@claude-skills
+/plugin install keikat@claude-skills
+```
+
+Lataa sen jälkeen `/reload-plugins`.
+
+## orchestrate
+
+```
+/orchestrate lisää asetusnäyttöön ilmoitusten kytkin ja kirjoita siitä testit
+```
+
+Orkestroija (istunnon malli) lukee koodin, näyttää suunnitelman taulukkona (osatehtävä, työntekijä, tiedostot) ja odottaa hyväksyntääsi. Sen jälkeen riippumattomat osatehtävät ajetaan rinnakkain, ja orkestroija tarkastaa tulokset, ajaa testit ja tekee yhteenvedon. Työntekijät eivät koskaan commitoi tai pushaa. Jos työntekijä epäonnistuu, sille annetaan uusi ohje kerran, ja sen jälkeen orkestroija tekee osatehtävän itse.
+
+Työntekijät ovat `haiku-worker` (Haiku, matala työmäärä: mekaaniset muutokset) ja `sonnet-worker` (Sonnet, keskitaso: rajatut tehtävät, jotka vaativat harkintaa). Pluginin kanssa ne näkyvät nimillä `orchestrate:haiku-worker` ja `orchestrate:sonnet-worker`. Jos sinulla on omat samannimiset työntekijät, pluginin työntekijät ovat etusijalla.
+
+Valinnainen etenemispalkki vaatii [savvy-progress](https://github.com/johnnyvizz/claude-kit/tree/main/plugins/savvy-progress)-pluginin. Ilman sitä komento toimii samoin ja jättää palkin pois. Palkin kautta Haiku-tehtävät merkitään nimellä `light` ja Sonnet-tehtävät nimellä `medium`; merkintä on pelkkä kosmeettinen nimi suunnitellulle riville.
+
+## keikat
 
 ```
 /keikat          # oletuskaupunki ja -aikaväli (tehdasasetus Oulu, 1 kk)
@@ -46,24 +71,24 @@ Lähteet:
 
 Skilli toimii ilman selainta. Skriptit käyttävät tavallista HTTP-hakua, ja sivu tehdään valmiista pohjasta (`templates/keikat.html`) skriptillä `sivu.py`.
 
-## Asennus
+### Asennus ilman marketplacea
 
-Kloonaa repo ja linkitä haluamasi skilli Clauden skill-kansioon:
+Kloonaa repo ja linkitä skilli Clauden skill-kansioon:
 
 ```bash
 git clone https://github.com/juusimaa/suomi-skills.git
-ln -s "$PWD/suomi-skills/skills/keikat" ~/.claude/skills/keikat
+ln -s "$PWD/suomi-skills/plugins/keikat/skills/keikat" ~/.claude/skills/keikat
 ```
 
 Skriptit tarvitsevat vain Python 3:n standardikirjaston. Niitä voi ajaa myös suoraan:
 
 ```bash
-python3 skills/keikat/scripts/paikat_oulu.py --months 3 --table   # vain Oulu
-python3 skills/keikat/scripts/paikat_tampere.py --months 3 --table
-python3 skills/keikat/scripts/paikat_jyvaskyla.py --months 3 --table
-python3 skills/keikat/scripts/linkedevents.py --city Helsinki --months 1 --table
-python3 skills/keikat/scripts/tiketti.py --city Tampere --months 3 --table
-python3 skills/keikat/scripts/ticketmaster.py --city Tampere --months 3 --table
+python3 plugins/keikat/skills/keikat/scripts/paikat_oulu.py --months 3 --table   # vain Oulu
+python3 plugins/keikat/skills/keikat/scripts/paikat_tampere.py --months 3 --table
+python3 plugins/keikat/skills/keikat/scripts/paikat_jyvaskyla.py --months 3 --table
+python3 plugins/keikat/skills/keikat/scripts/linkedevents.py --city Helsinki --months 1 --table
+python3 plugins/keikat/skills/keikat/scripts/tiketti.py --city Tampere --months 3 --table
+python3 plugins/keikat/skills/keikat/scripts/ticketmaster.py --city Tampere --months 3 --table
 ```
 
 `asetukset.py` näyttää ja tallentaa oletukset (`--kaupunki`, `--kuukaudet`, `--nollaa`). `paikat_<kaupunki>.py`-skriptit lukevat yhden kaupungin keikkapaikkoja. `tiketti.py`, `ticketmaster.py` ja `linkedevents.py` ottavat kaupungin valinnalla `--city`.
@@ -71,15 +96,22 @@ python3 skills/keikat/scripts/ticketmaster.py --city Tampere --months 3 --table
 ## Rakenne
 
 ```
-skills/
+.claude-plugin/marketplace.json     # listaa pluginit
+plugins/
+├── orchestrate/
+│   ├── .claude-plugin/plugin.json
+│   ├── commands/orchestrate.md     # /orchestrate
+│   └── agents/                     # haiku-worker, sonnet-worker
 └── keikat/
-    ├── SKILL.md            # ohjeet Claudelle
-    ├── cities/             # kaupunkikohtaiset lähteet
-    ├── scripts/            # tiedonhaku ja sivun teko
-    └── templates/          # web-sivun pohja
+    ├── .claude-plugin/plugin.json
+    └── skills/keikat/
+        ├── SKILL.md                # ohjeet Claudelle
+        ├── cities/                 # kaupunkikohtaiset lähteet
+        ├── scripts/                # tiedonhaku ja sivun teko
+        └── templates/              # web-sivun pohja
 ```
 
-Jokainen skilli on omassa kansiossaan `skills/<nimi>/`, ja kansion juuressa on `SKILL.md`.
+Jokainen plugin on omassa kansiossaan `plugins/<nimi>/`, ja se on listattu tiedostossa `.claude-plugin/marketplace.json`. Skillin kansion juuressa on `SKILL.md`.
 
 ## Huomioita
 
@@ -87,6 +119,8 @@ Skriptit lukevat julkisia tapahtumasivuja, ja sivujen rakenne voi muuttua. Jos j
 
 ## Lisenssi
 
-[PolyForm Noncommercial 1.0.0](LICENSE.md). Saat käyttää, muokata ja jakaa skillejä ei-kaupallisiin tarkoituksiin, kuten omaan käyttöön, harrastuksiin, opetukseen ja tutkimukseen. Kaupallinen käyttö vaatii erillisen luvan. Lisenssi koskee kaikkia repositorion versioita, myös ennen lisenssitiedostoa tehtyjä committeja.
+Koko repositorio on [Apache-2.0](LICENSE)-lisenssillä. Saat käyttää, muokata ja jakaa pluginit myös kaupallisesti lisenssin ehtojen mukaan. Tekijänoikeusilmoitus on tiedostossa [NOTICE](NOTICE).
+
+Tätä muutosta edeltävät versiot (pluginin `keikat` aiemmat commitit) julkaistiin lisenssillä PolyForm Noncommercial 1.0.0.
 
 Copyright © 2026 Jouni Uusimaa

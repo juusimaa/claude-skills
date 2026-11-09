@@ -1,0 +1,10 @@
+{
+  "name": "keikat",
+  "version": "1.0.0",
+  "description": "/keikat: Suomen 17 suurimman kaupungin musiikkikeikat yhdeksi listaksi hintoineen ja lipputilanteineen, terminaaliin ja suodatettavalle web-sivulle.",
+  "author": {
+    "name": "Jouni Uusimaa"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["keikat", "musiikki", "suomi", "konsertit"]
+}

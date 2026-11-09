@@ -1,0 +1,19 @@
+{
+  "name": "claude-skills",
+  "owner": {
+    "name": "Jouni Uusimaa"
+  },
+  "description": "Claude Code plugins by Jouni Uusimaa: /orchestrate (plan, then implement in parallel with Haiku and Sonnet workers) and /keikat (music gigs in Finnish cities).",
+  "plugins": [
+    {
+      "name": "orchestrate",
+      "source": "./plugins/orchestrate",
+      "description": "/orchestrate: plan with the session model, implement in parallel with Haiku and Sonnet workers."
+    },
+    {
+      "name": "keikat",
+      "source": "./plugins/keikat",
+      "description": "/keikat: Suomen 17 suurimman kaupungin musiikkikeikat hintoineen ja lipputilanteineen."
+    }
+  ]
+}

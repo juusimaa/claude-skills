@@ -1,0 +1,10 @@
+{
+  "name": "orchestrate",
+  "version": "1.0.0",
+  "description": "/orchestrate: the session model plans a task, then Haiku and Sonnet workers implement the subtasks in parallel. Shows a progress bar if savvy-progress is installed.",
+  "author": {
+    "name": "Jouni Uusimaa"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["orchestration", "subagents", "parallel", "haiku", "sonnet"]
+}
