@@ -14,7 +14,7 @@ Omia pluginejaan ja skilliään [Claude Codelle](https://claude.com/claude-code)
 Lisää marketplace ja asenna haluamasi plugin:
 
 ```
-/plugin marketplace add juusimaa/suomi-skills
+/plugin marketplace add juusimaa/claude-skills
 /plugin install orchestrate@claude-skills
 /plugin install keikat@claude-skills
 ```
@@ -76,8 +76,8 @@ Skilli toimii ilman selainta. Skriptit käyttävät tavallista HTTP-hakua, ja si
 Kloonaa repo ja linkitä skilli Clauden skill-kansioon:
 
 ```bash
-git clone https://github.com/juusimaa/suomi-skills.git
-ln -s "$PWD/suomi-skills/plugins/keikat/skills/keikat" ~/.claude/skills/keikat
+git clone https://github.com/juusimaa/claude-skills.git
+ln -s "$PWD/claude-skills/plugins/keikat/skills/keikat" ~/.claude/skills/keikat
 ```
 
 Skriptit tarvitsevat vain Python 3:n standardikirjaston. Niitä voi ajaa myös suoraan:
