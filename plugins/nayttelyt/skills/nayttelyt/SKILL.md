@@ -84,7 +84,8 @@ Kirjoita lista JSON-tiedostoksi scratchpad-kansioon nimeksi `nayttelyt-<kaupunki
 - `range`: haettu aikaväli, esim. `16.–22.11.2026` (oletusviikolla koko viikko ma–su). `generated`: tämä päivä (`YYYY-MM-DD`).
 - `from`, `to`: haun alku ja loppu (`YYYY-MM-DD`). `from` on ikkunan alku, ja Uusi-tunniste lasketaan siitä, ei tästä päivästä.
 - `exhibitions`: `name` ja `venue` ovat pakollisia. Lisäksi `start`, `end` (tyhjä tai `2026-11-20`), `permanent`, `hours`, `price`, `url`, `note`, `source`.
-- `notes`: taulukon jälkeinen yhteenvetorivi ja maininta siitä, että lista ei ole täydellinen.
+- `notes`: sivun alaosan teksti kävijälle, 1–2 lausetta: lista ei ole täydellinen ja aukioloajat kannattaa tarkistaa ennen käyntiä. Ei näyttelyiden määrää eikä työvaiheita (mitä pudotettiin, mistä haettiin): ne kuuluvat terminaalin yhteenvetoriviin.
+- `sources`-nimet ovat kävijälle tuttuja palveluiden nimiä (esim. `Oulu2026`), ei sisäisiä kuvauksia.
 - `sources`: lähteet, jotka tuottivat tuloksia, muodossa `{"name", "url"}`.
 
 Aja `python3 -I <tämän skillin kansio>/scripts/sivu.py <nayttelyt-kaupunki.json> <nayttelyt-kaupunki.html>`. Molemmat tiedostot tulevat scratchpad-kansioon. Skripti tulostaa markdown-taulukon: tulosta se sellaisenaan vastaukseksi otsikon (esim. `Näyttelyt Oulussa 16.–22.11.2026`) alle.
