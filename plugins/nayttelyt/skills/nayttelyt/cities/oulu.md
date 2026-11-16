@@ -2,7 +2,12 @@
 
 ## Skriptit
 
-Täytetään tehtävässä 5.
+```bash
+python3 -I <skillin kansio>/scripts/nayttelyt_oulu.py --from YYYY-MM-DD --to YYYY-MM-DD
+```
+
+Skripti lukee lähteet 1–3: tapahtumapalvelun näyttelyt (`Exhibitions`-kategoria), Oulun taidemuseon näyttelylistan ja Kulttuuritalo Valven widgetin, sekä lisää kirjoitetut pysyvät rivit (Tiima, Galleria Oskari Jauhiainen ym.) aukioloaikoineen ja hintoineen.
+Se pudottaa elokuvat, kierrokset, työpajat, verkkonäyttelyt ja muut kertatapahtumat sekä yhdistää saman näyttelyn kaksoisrivit. Lähteet 4–6 ja puuttuvat tiedot haetaan haulla.
 
 ## Lähteet
 
