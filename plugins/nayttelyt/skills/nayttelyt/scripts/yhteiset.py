@@ -48,17 +48,32 @@ def overlaps(e: dict, frm: date, to: date) -> bool:
     return s <= to and t >= frm
 
 
+def name_key(name: str) -> str:
+    """Nimen vertailuavain: foldattu, välimerkit ja viivat pois ("Aalto Design - X" == "Aalto Design – X")."""
+    return " ".join(re.sub(r"[^\w]+", " ", fold(name)).split())
+
+
+def same_exhibition(a: str, b: str) -> bool:
+    """Sama näyttely samassa paikassa: nimet samat tai toinen sisältää toisen ("Luova Tuho" / "Luova Tuho – Johan …")."""
+    a, b = name_key(a), name_key(b)
+    short, long_ = sorted((a, b), key=len)
+    return a == b or (len(short) >= 8 and f" {short} " in f" {long_} ")
+
+
 def merge(rows: list[dict]) -> list[dict]:
-    out: dict = {}
+    """Yhdistää saman näyttelyn rivit (sama paikka, sama tai sisältyvä nimi). Ensimmäinen rivi voittaa, puuttuvat
+    kentät täytetään myöhemmistä."""
+    out: list[dict] = []
     for r in rows:
-        k = (fold(r["name"]), fold(r["venue"]))
-        if k not in out:
-            out[k] = dict(r)
+        hit = next((o for o in out if fold(o["venue"]) == fold(r["venue"])
+                    and o.get("permanent") == r.get("permanent") and same_exhibition(o["name"], r["name"])), None)
+        if hit is None:
+            out.append(dict(r))
             continue
         for f, v in r.items():
-            if out[k].get(f) in ("", "–", None) and v not in ("", "–", None):
-                out[k][f] = v
-    return list(out.values())
+            if hit.get(f) in ("", "–", None) and v not in ("", "–", None):
+                hit[f] = v
+    return out
 
 
 def helsinki_day(ts: str) -> str:

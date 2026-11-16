@@ -58,6 +58,22 @@ class T(unittest.TestCase):
         self.assertIn("broken: boom", err.getvalue())
         self.assertEqual([r["name"] for r in json.loads(out.getvalue())], ["A"])
 
+    def test_merge_variant_titles(self):
+        r = lambda n, v, h="–", u="": {"name": n, "venue": v, "permanent": False, "hours": h, "url": u}
+        m = y.merge([r("Aalto Design – Hyvinvoinnin muodot", "Designmuseo", h="ti–su 11–18"),
+                     r("Aalto Design - Hyvinvoinnin muodot", "Designmuseo", u="https://a"),
+                     r("Luova Tuho – Johan Eichhornin valokuvasarja", "Museo X", h="ti 12–16"),
+                     r("Luova Tuho", "Museo X", u="https://b"),
+                     r("Luova Tuho", "Toinen paikka"),
+                     r("Kevät", "Museo X")])
+        self.assertEqual(len(m), 4)
+        self.assertEqual((m[0]["hours"], m[0]["url"]), ("ti–su 11–18", "https://a"))
+        self.assertEqual((m[1]["hours"], m[1]["url"]), ("ti 12–16", "https://b"))
+
+    def test_merge_keeps_short_distinct_names(self):
+        r = lambda n: {"name": n, "venue": "V", "permanent": False}
+        self.assertEqual(len(y.merge([r("Uni"), r("Unikuvia ja muuta")])), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

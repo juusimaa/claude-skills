@@ -8,7 +8,7 @@ My own plugins and skills for [Claude Code](https://claude.com/claude-code): a c
 |---|---|---|---|
 | [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: the session model plans a task, and Haiku and Sonnet workers implement the subtasks in parallel. | [1.0.0](plugins/orchestrate/CHANGELOG.md) | Apache-2.0 |
 | [keikat](plugins/keikat/skills/keikat/SKILL.md) | `/keikat`: music gigs in Finland's 17 largest cities, as one list with prices and ticket status, in the terminal and as a filterable web page. | [1.0.0](plugins/keikat/CHANGELOG.md) | Apache-2.0 |
-| [nayttelyt](plugins/nayttelyt/skills/nayttelyt/SKILL.md) | `/nayttelyt`: exhibitions (art, photography, design, museums) open in a city this week or a chosen period, with hours, prices and tags, in the terminal and as a web page. Oulu for now. | [1.0.0](plugins/nayttelyt/CHANGELOG.md) | Apache-2.0 |
+| [nayttelyt](plugins/nayttelyt/skills/nayttelyt/SKILL.md) | `/nayttelyt`: exhibitions (art, photography, design, museums) open in a city this week or a chosen period, with hours, prices and tags, in the terminal and as a web page. Oulu and Helsinki for now. | [1.1.0](plugins/nayttelyt/CHANGELOG.md) | Apache-2.0 |
 | [elokuvat](plugins/elokuvat/skills/elokuvat/SKILL.md) | `/elokuvat`: cinema showtimes (Finnkino and independent cinemas) in a Finnish city tonight, tomorrow or this week, with booking links, in the terminal and as a filterable web page. | [1.0.0](plugins/elokuvat/CHANGELOG.md) | Apache-2.0 |
 
 ## Installation
@@ -108,13 +108,14 @@ The command's arguments are in Finnish (`viikko` is the week, `3kk` is 3 months,
 /nayttelyt 3kk         # 1–12 months from today
 /nayttelyt joulukuussa
 /nayttelyt Oulu viikko
+/nayttelyt Helsinki    # another supported city
 
 /nayttelyt asetukset Oulu 3kk   # save defaults for plain /nayttelyt
 /nayttelyt asetukset            # show the current defaults
 /nayttelyt asetukset nollaa     # back to the factory defaults
 ```
 
-Defaults are saved in `~/.config/nayttelyt/asetukset.json` (or `$XDG_CONFIG_HOME/nayttelyt/`). Only Oulu is supported for now; the other cities of keikat are coming.
+Defaults are saved in `~/.config/nayttelyt/asetukset.json` (or `$XDG_CONFIG_HOME/nayttelyt/`). Oulu and Helsinki are supported for now; the other cities of keikat are coming.
 
 The skill lists the exhibitions that are open in the period, temporary and permanent, with opening hours and prices. Films and live music are left out, and so are one-off events such as guided tours and workshops. Tags:
 
