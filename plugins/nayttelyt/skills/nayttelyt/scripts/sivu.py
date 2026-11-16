@@ -58,9 +58,9 @@ def md_table(data: dict) -> str:
     today = date.fromisoformat(data["generated"])
     cell = lambda s: (s or "–").replace("|", "\\|").replace("\n", " ")
     lines = [f"{data.get('title', '')} {data.get('range', '')}".strip(), "",
-             "| Tagit | Näyttely | Paikka | Ajalla | Aukioloajat | Hinta | Linkki |", "|---|---|---|---|---|---|---|"]
+             "| Tagit | Näyttely | Paikka | Ajalla | Aukioloajat | Hinta | Lisätiedot |", "|---|---|---|---|---|---|---|"]
     for e in data.get("exhibitions") or []:
-        link = f"[Linkki]({e['url']})" if e.get("url") else "–"
+        link = f"[Lisätiedot]({e['url']})" if e.get("url") else "–"
         lines.append("| " + " | ".join([cell(", ".join(e.get("tags") or [])), cell(e["name"]), cell(e["venue"]),
                                         cell(date_text(e, today)), cell(e.get("hours")), cell(e.get("price")), link]) + " |")
     return "\n".join(lines)

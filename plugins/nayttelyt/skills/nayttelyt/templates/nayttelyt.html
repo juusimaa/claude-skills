@@ -61,10 +61,11 @@ h1 .t2 { font-size: clamp(2rem, calc(100cqi / (var(--chars, 10) * .52)), 6rem); 
 .check { display: flex; gap: 8px; align-items: center; min-height: 44px; cursor: pointer; }
 .check input { width: 1.25rem; height: 1.25rem; margin: 0; }
 .field input::placeholder { color: var(--muted); opacity: 1; }
-.check[hidden] { display: none; }
+.more-body { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; }
+.more > summary { display: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .reset[hidden] { display: none; }
-.reset { font: inherit; font-size: .9rem; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--field-line); border-radius: 6px; padding: 7px 12px; min-height: 40px; cursor: pointer; }
+.reset { font: inherit; font-size: .9rem; font-weight: 600; color: var(--fg); background: none; border: 1px solid var(--field-line); border-radius: 6px; padding: 7px 12px; min-height: 40px; cursor: pointer; }
 .count { font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 /* Laskuri kuuluu listaan: lähempänä listaa kuin suodattimia, ja korkeus varattu ettei lista hyppää painikkeen ilmestyessä. */
 .bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; margin-block: -8px -12px; }
@@ -87,14 +88,16 @@ h1 .t2 { font-size: clamp(2rem, calc(100cqi / (var(--chars, 10) * .52)), 6rem); 
 .right { display: grid; justify-items: end; align-content: start; gap: 4px; text-align: right; }
 /* Täyte kasvattaa osuma-alueen 44 px:iin muuttamatta ulkoasua. */
 .link { color: var(--fg); font-weight: 600; font-size: .92rem; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; display: inline-block; padding: 12px 8px; margin: -12px -8px; }
-.link:hover { color: var(--accent); }
+/* Rengas tekstin ympärille, ei näkymättömän osuma-alueen: muuten se peittää hinnan. */
+.link:focus-visible { outline-offset: -6px; }
+@media (hover: hover) { .link:hover { color: var(--accent); } }
 .note { font-size: .85rem; color: var(--muted); max-width: 70ch; }
 .note.warn { color: var(--fg); font-weight: 600; }
-.empty { color: var(--muted); padding: 24px 0; border-top: 3px solid var(--fg); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-.empty p { flex: 1 1 100%; margin: 0; }
+.empty { color: var(--muted); padding: 24px 0; border-top: 3px solid var(--fg); }
+.empty p { margin: 0; }
 footer { color: var(--muted); font-size: .88rem; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
 footer p { margin: 0; max-width: 70ch; text-wrap: pretty; }
-footer a { color: var(--accent); text-underline-offset: 2px; }
+footer a { color: var(--fg); text-decoration-color: var(--accent); text-underline-offset: 2px; }
 
 @media (max-width: 560px) {
   .card { grid-template-columns: 1fr; }
@@ -105,6 +108,14 @@ footer a { color: var(--accent); text-underline-offset: 2px; }
   .filters .field { flex: 1 1 100%; }
   #venue { max-width: none; }
   header { padding-bottom: 12px; }
+  .more { flex: 1 1 100%; }
+  .more > summary { display: list-item; padding-block: 11px; cursor: pointer; font-weight: 600; font-size: .95rem; color: var(--fg); }
+  .more > summary::marker { color: var(--accent); }
+  .more[open] > summary { margin-bottom: 8px; }
+}
+@media print {
+  .filters, .bar { display: none; }
+  body { background: #fff; }
 }
 </style>
 
@@ -120,12 +131,18 @@ footer a { color: var(--accent); text-underline-offset: 2px; }
       <label for="q">Haku</label>
       <input id="q" type="search" placeholder="näyttely, paikka tai taiteilija">
     </div>
-    <div class="field">
-      <label for="venue">Paikka</label>
-      <select id="venue"><option value="">Kaikki paikat</option></select>
-    </div>
-    <label class="check" for="free"><input id="free" type="checkbox"> Vain ilmaiset</label>
-    <label class="check" for="fresh"><input id="fresh" type="checkbox"> Vain uudet</label>
+    <!-- Puhelimella haku riittää näkyviin; muut suodattimet avataan tarvittaessa. Isommalla näytöllä aina auki. -->
+    <details class="more" id="more">
+      <summary id="more-label">Lisää suodattimia</summary>
+      <div class="more-body">
+        <div class="field">
+          <label for="venue">Paikka</label>
+          <select id="venue"><option value="">Kaikki paikat</option></select>
+        </div>
+        <label class="check" for="free"><input id="free" type="checkbox"> Vain ilmaiset</label>
+        <label class="check" for="fresh"><input id="fresh" type="checkbox"> Vain uudet</label>
+      </div>
+    </details>
   </form>
 
   <div class="bar">
@@ -171,6 +188,11 @@ footer a { color: var(--accent); text-underline-offset: 2px; }
   const venues = [...new Set(rows.map((e) => e.venue))].sort((a, b) => a.localeCompare(b, "fi"));
   for (const v of venues) { const o = el("option", null, v); o.value = v; $("venue").append(o); }
 
+  const wide = matchMedia("(min-width: 561px)");
+  const syncMore = () => { if (wide.matches) $("more").open = true; };
+  wide.addEventListener("change", syncMore);
+  syncMore();
+
   let announce;
   function render() {
     const words = $("q").value.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -178,6 +200,8 @@ footer a { color: var(--accent); text-underline-offset: 2px; }
     const shown = rows.filter((e) => (!venue || e.venue === venue) && (!free || isFree(e)) && (!fresh || isNew(e)) && words.every((w) => e._hay.includes(w)));
     const filtered = Boolean(words.length || venue || free || fresh);
     $("clear").hidden = !filtered;
+    const hiddenActive = [venue, free, fresh].filter(Boolean).length;
+    $("more-label").textContent = hiddenActive ? "Lisää suodattimia (" + hiddenActive + " käytössä)" : "Lisää suodattimia";
     const total = filtered ? shown.length + " / " + plural(rows.length, "näyttely", "näyttelyä") : "Kaikki " + plural(rows.length, "näyttely", "näyttelyä");
     $("count").textContent = total;
     // Ruudunlukijalle tulos vasta kun kirjoittaminen taukoaa.
