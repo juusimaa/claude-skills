@@ -37,12 +37,13 @@ def tags(e: dict, frm: date, today: date) -> list:
 def sort_key(e: dict) -> tuple:
     t = e.get("tags") or []
     rank = 3 if e.get("permanent") else 0 if "Uusi" in t else 1 if "Päättyy pian" in t else 2
-    return (rank, e.get("start") or "", e.get("name") or "")
+    # Ryhmän sisällä ensin se, joka päättyy ensin.
+    return (rank, e.get("end") or "9999-12-31", e.get("name") or "")
 
 
 def date_text(e: dict, today: date) -> str:
     if e.get("permanent"):
-        return "Pysyvä"
+        return ""  # Pysyvä-tunniste ja ryhmän otsikko kertovat jo tämän
 
     def f(iso):
         d = date.fromisoformat(iso)
@@ -82,6 +83,8 @@ def main(argv=None) -> int:
         return 1
     frm, today = date.fromisoformat(data["from"]), date.fromisoformat(data["generated"])
     for e in rows:
+        # Lähteiden välilyöntivirheet pois: "Nimi : alaotsikko", tuplavälit.
+        e["name"] = re.sub(r"\s+:", ":", " ".join(e["name"].split()))
         e["tags"] = tags(e, frm, today)
     data["exhibitions"] = rows = sorted(rows, key=sort_key)
     for e in rows:
