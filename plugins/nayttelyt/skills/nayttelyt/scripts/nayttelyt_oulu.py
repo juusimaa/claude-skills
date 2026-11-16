@@ -7,18 +7,14 @@ Käyttö:
 Oletus: tänään – tämän viikon sunnuntai. Tuloste on JSON-lista tai taulukko (--table).
 Lähde, joka ei vastaa, raportoidaan stderriin ja ohitetaan.
 """
-import argparse
-import html as htmllib
 import json
+import pathlib
 import re
 import sys
-import unicodedata
-import urllib.request
-from datetime import date, datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
+from datetime import date
 
-UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
-FI = ZoneInfo("Europe/Helsinki")
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))  # -I jättää skriptin kansion pois
+from yhteiset import fetch, fold, helsinki_day, merge, overlaps, run, text, this_week  # noqa: E402,F401
 EVENTS = "https://tapahtumat.munoulu.fi/api/search/internal-content-fetch?lang=fi&country=FI&mode=event"
 PAGE = "https://tapahtumat.munoulu.fi/fi-FI/page/"
 WIDGET = ("https://tapahtumat.munoulu.fi/widget/67b6f7af04b40b760fdd944c?currentLocation="
@@ -42,51 +38,20 @@ VALVE_HOURS = "ma–pe 9–21, la–su 10–21"
 VENUE_INFO = {MUSEO: (MUSEO_HOURS, MUSEO_PRICE), TIIMA: (TIIMA_HOURS, TIIMA_PRICE), VALVE: (VALVE_HOURS, "Ilmainen")}
 
 
-def fetch(url: str) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "fi"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return r.read().decode("utf-8", "replace")
 
 
-def text(fragment: str) -> str:
-    """HTML-pätkä siistiksi tekstiksi."""
-    s = re.sub(r"<br\s*/?>", " ", fragment)
-    s = htmllib.unescape(re.sub(r"<[^>]+>", "", s)).replace("\xad", "")
-    return re.sub(r"\s+", " ", s).strip(" ,")
 
 
-def fold(s: str) -> str:
-    """Vertailuavain: pienet kirjaimet ilman ääkkösten pisteitä ("Jyväskylä" -> "jyvaskyla")."""
-    return "".join(c for c in unicodedata.normalize("NFD", s.strip().lower()) if not unicodedata.combining(c))
 
 
-def this_week(today: date) -> tuple[date, date]:
-    return today, today + timedelta(days=6 - today.weekday())
 
 
-def overlaps(e: dict, frm: date, to: date) -> bool:
-    if e.get("permanent"):
-        return True
-    s = date.fromisoformat(e["start"]) if e.get("start") else date.min
-    t = date.fromisoformat(e["end"]) if e.get("end") else date.max
-    return s <= to and t >= frm
 
 
 def is_exhibition(name: str, start: str, end: str) -> bool:
     return start != end and not NOISE.search(name)
 
 
-def merge(rows: list[dict]) -> list[dict]:
-    out: dict = {}
-    for r in rows:
-        k = (fold(r["name"]), fold(r["venue"]))
-        if k not in out:
-            out[k] = dict(r)
-            continue
-        for f, v in r.items():
-            if out[k].get(f) in ("", "–", None) and v not in ("", "–", None):
-                out[k][f] = v
-    return list(out.values())
 
 
 def row(name, venue, start="", end="", permanent=False, hours="", price="–", url="", note="", source=""):
@@ -116,11 +81,9 @@ def cap(r: dict) -> dict:
     return r
 
 
-def helsinki_day(ts: str) -> str:
-    return datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(FI).date().isoformat()
 
 
-def tapahtumapalvelu(today: date) -> list[dict]:
+def tapahtumapalvelu(frm: date, to: date) -> list[dict]:
     out = []
     for p in json.loads(fetch(EVENTS))["pages"]:
         cats = p.get("globalContentCategories") or []
@@ -144,7 +107,7 @@ def tapahtumapalvelu(today: date) -> list[dict]:
     return out
 
 
-def taidemuseo(today: date) -> list[dict]:
+def taidemuseo(frm: date, to: date) -> list[dict]:
     out = []
     pat = r'class="item-date[^>]*>([^<]*)</span>.*?<h2>(.*?)</h2>.*?href="([^"]+)"'
     for d, name, url in re.findall(pat, fetch(MUSEO_URL), re.S):
@@ -156,7 +119,7 @@ def taidemuseo(today: date) -> list[dict]:
     return out
 
 
-def valve(today: date) -> list[dict]:
+def valve(frm: date, to: date) -> list[dict]:
     out = []
     for card in json.loads(fetch(WIDGET))["html"].split('<div class="bubster-page')[1:]:
         g = lambda c: re.search(r'class="%s"[^>]*>(.*?)</(?:a|div)>' % c, card, re.S)
@@ -172,7 +135,7 @@ def valve(today: date) -> list[dict]:
     return out
 
 
-def pysyvat(today: date) -> list[dict]:
+def pysyvat(frm: date, to: date) -> list[dict]:
     return [
         row("Oulun taidemuseo – pysyvät näyttelyt", MUSEO, permanent=True, url="https://ouluntaidemuseo.fi/kokoelmanayttelyt/",
             note="Kokoelmanäyttelyt, ei kiinteää jaksoa", source="ouluntaidemuseo.fi"),
@@ -189,33 +152,8 @@ def pysyvat(today: date) -> list[dict]:
 READERS = [tapahtumapalvelu, taidemuseo, valve, pysyvat]
 
 
-def table(rows: list[dict]) -> str:
-    head = ["Näyttely", "Paikka", "Ajalla", "Aukioloajat", "Hinta"]
-    body = [[r["name"], r["venue"], "Pysyvä" if r["permanent"] else f'{r["start"] or "–"} – {r["end"] or "–"}',
-             r["hours"] or "–", r["price"] or "–"] for r in rows]
-    w = [max(len(x[i]) for x in [head] + body) for i in range(len(head))]
-    return "\n".join("  ".join(c.ljust(w[i]) for i, c in enumerate(x)).rstrip() for x in [head] + body)
-
-
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--from", dest="frm")
-    ap.add_argument("--to")
-    ap.add_argument("--table", action="store_true")
-    a = ap.parse_args(argv)
-    today = datetime.now(FI).date()
-    frm = date.fromisoformat(a.frm) if a.frm else this_week(today)[0]
-    to = date.fromisoformat(a.to) if a.to else this_week(today)[1]
-    rows = []
-    for rd in READERS:
-        try:
-            rows += rd(today)
-        except Exception as ex:
-            print(f"{rd.__name__}: {ex}", file=sys.stderr)
-    rows = merge([r for r in rows if (r["permanent"] or is_exhibition(r["name"], r["start"], r["end"])) and overlaps(r, frm, to)])
-    rows.sort(key=lambda r: (r["permanent"], r["start"], r["name"]))
-    print(table(rows) if a.table else json.dumps(rows, ensure_ascii=False, indent=2))
-    return 0
+    return run(READERS, lambda r: is_exhibition(r["name"], r["start"], r["end"]), argv)
 
 
 if __name__ == "__main__":
