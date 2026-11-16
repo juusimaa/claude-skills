@@ -8,6 +8,7 @@ My own plugins and skills for [Claude Code](https://claude.com/claude-code): a c
 |---|---|---|
 | [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: the session model plans a task, and Haiku and Sonnet workers implement the subtasks in parallel. | Apache-2.0 |
 | [keikat](plugins/keikat/skills/keikat/SKILL.md) | `/keikat`: music gigs in Finland's 17 largest cities, as one list with prices and ticket status, in the terminal and as a filterable web page. | Apache-2.0 |
+| [nayttelyt](plugins/nayttelyt/skills/nayttelyt/SKILL.md) | `/nayttelyt`: exhibitions (art, photography, design, museums) open in a city this week or a chosen period, with hours, prices and tags, in the terminal and as a web page. Oulu for now. | Apache-2.0 |
 
 ## Installation
 
@@ -17,6 +18,7 @@ Add the marketplace and install the plugins you want:
 /plugin marketplace add juusimaa/claude-skills
 /plugin install orchestrate@claude-skills
 /plugin install keikat@claude-skills
+/plugin install nayttelyt@claude-skills
 ```
 
 Then run `/reload-plugins`.
@@ -95,6 +97,55 @@ python3 plugins/keikat/skills/keikat/scripts/ticketmaster.py --city Tampere --mo
 
 `asetukset.py` shows and saves the defaults (`--kaupunki`, `--kuukaudet`, `--nollaa`). The `paikat_<city>.py` scripts read the venues of one city. `tiketti.py`, `ticketmaster.py` and `linkedevents.py` take the city with `--city`.
 
+## nayttelyt
+
+The command's arguments are in Finnish (`viikko` is the week, `3kk` is 3 months, `joulukuussa` is "in December").
+
+```
+/nayttelyt             # default city and period (factory default Oulu, this week)
+/nayttelyt 3kk         # 1–12 months from today
+/nayttelyt joulukuussa
+/nayttelyt Oulu viikko
+
+/nayttelyt asetukset Oulu 3kk   # save defaults for plain /nayttelyt
+/nayttelyt asetukset            # show the current defaults
+/nayttelyt asetukset nollaa     # back to the factory defaults
+```
+
+Defaults are saved in `~/.config/nayttelyt/asetukset.json` (or `$XDG_CONFIG_HOME/nayttelyt/`). Only Oulu is supported for now; the other cities of keikat are coming.
+
+The skill lists the exhibitions that are open in the period, temporary and permanent, with opening hours and prices. Films and live music are left out, and so are one-off events such as guided tours and workshops. Tags:
+
+- **Uusi** (new): opens during the first 7 days of the period.
+- **Päättyy pian** (ending soon): ends within 7 days from today.
+- **Pysyvä** (permanent): a permanent exhibition.
+
+The result is a table in the terminal and a web page (a claude.ai artifact).
+
+Sources:
+
+| Source | How |
+|---|---|
+| Oulu events service (exhibitions) | script (`nayttelyt_oulu.py`) |
+| Oulun taidemuseo | script (`nayttelyt_oulu.py`) |
+| Kulttuuritalo Valve galleries | script (`nayttelyt_oulu.py`) |
+| Venue pages (Tiima, Kotilo, libraries, galleries) | the city's file `cities/oulu.md`, read with a web search |
+
+### Installation without the marketplace
+
+```bash
+ln -s "$PWD/claude-skills/plugins/nayttelyt/skills/nayttelyt" ~/.claude/skills/nayttelyt
+```
+
+The scripts need only the Python 3 standard library. You can also run them directly:
+
+```bash
+python3 plugins/nayttelyt/skills/nayttelyt/scripts/nayttelyt_oulu.py --from 2026-11-16 --to 2026-11-22 --table
+python3 plugins/nayttelyt/skills/nayttelyt/scripts/asetukset.py --kaupunki Oulu --aikavali 3
+```
+
+`asetukset.py` shows and saves the defaults (`--kaupunki`, `--aikavali`, `--nollaa`). `sivu.py` builds the web page from a JSON file.
+
 ## Structure
 
 ```
@@ -104,9 +155,16 @@ plugins/
 │   ├── .claude-plugin/plugin.json
 │   ├── commands/orchestrate.md     # /orchestrate
 │   └── agents/                     # haiku-worker, sonnet-worker
-└── keikat/
+├── keikat/
+│   ├── .claude-plugin/plugin.json
+│   └── skills/keikat/
+│       ├── SKILL.md                # instructions for Claude
+│       ├── cities/                 # per-city sources
+│       ├── scripts/                # data fetching and page building
+│       └── templates/              # web page template
+└── nayttelyt/
     ├── .claude-plugin/plugin.json
-    └── skills/keikat/
+    └── skills/nayttelyt/
         ├── SKILL.md                # instructions for Claude
         ├── cities/                 # per-city sources
         ├── scripts/                # data fetching and page building
