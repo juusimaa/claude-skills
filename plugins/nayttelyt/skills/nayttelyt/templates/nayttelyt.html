@@ -1,0 +1,227 @@
+<meta charset="utf-8">
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: julisteyläosa, suodattimet ja yksi lista kortteja (Python on jo järjestänyt ja tagannut rivit). */
+/* Layout: julisteyläosa, suodattimet, kiinteä suunnistuspalkki ja päivittäin ryhmitelty lista (päiväleima vasemmalla, keikat oikealla). */
+:root {
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --fg: #16202b;
+  --muted: #5b6875;
+  --line: #d9e0e6;
+  --accent: #b93a0e;
+  --free: #1f6b3a;
+  --chip: #e6edf3;
+  --field-line: #7f8b99; /* kenttien ja painikkeiden reunat, vähintään 3:1 taustoja vasten */
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Source Sans 3", -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151b; --surface: #161e26; --fg: #e4eaf0; --muted: #94a3b1; --line: #26313c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #161e26; --fg: #e4eaf0; --muted: #94a3b1; --line: #26313c;
+  color-scheme: dark;
+}
+/* Selaimen omat pinnat (valinta, kursori, valintaruudut) samasta paletista. */
+:root { accent-color: var(--accent); }
+::selection { background: color-mix(in srgb, var(--accent) 28%, transparent); color: var(--fg); }
+input { caret-color: var(--accent); }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.wrap { max-width: 920px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+/* Julisteyläosa: kaupunki täydellä voimalla, päivät korostusvärillä, paksu painoviiva alla. */
+header { display: grid; gap: 10px; padding-bottom: 16px; border-bottom: 6px solid var(--fg); container-type: inline-size; }
+h1 { font-family: var(--display); font-weight: 700; margin: 0; text-transform: uppercase; display: grid; }
+h1 .t1 { font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 500; letter-spacing: .14em; line-height: 1; }
+/* Kaupunki mitoitetaan kirjainmäärän mukaan yhdelle riville (versaali-Barlow ~0.5em/merkki). */
+h1 .t2 { font-size: clamp(2rem, calc(100cqi / (var(--chars, 10) * .52)), 6rem); line-height: .86; letter-spacing: -.01em; white-space: nowrap; }
+.range { font-family: var(--display); font-weight: 700; font-size: clamp(1.5rem, 4.4vw, 2.3rem); line-height: 1; color: var(--accent); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.meta { color: var(--muted); font-size: .92rem; margin: 0; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: end; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label, .check { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.field input, .field select { font: inherit; font-size: 1rem; color: var(--fg); background: var(--bg); border: 1px solid var(--field-line); border-radius: 6px; padding: 7px 9px; min-width: 0; }
+#q { width: 18rem; max-width: 100%; }
+#venue { max-width: 18rem; }
+.check { display: flex; gap: 8px; align-items: center; min-height: 44px; cursor: pointer; }
+.check input { width: 1.25rem; height: 1.25rem; margin: 0; }
+.field input::placeholder { color: var(--muted); opacity: 1; }
+.check[hidden] { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.reset { font: inherit; font-size: .9rem; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--field-line); border-radius: 6px; padding: 7px 12px; min-height: 40px; cursor: pointer; }
+.count { font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.list { display: grid; }
+.card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 14px 0; border-top: 1px solid var(--line); }
+.card:first-child { border-top: 3px solid var(--fg); }
+.name { font-weight: 600; font-size: 1.1rem; overflow-wrap: anywhere; }
+.where, .hours { color: var(--muted); font-size: .92rem; overflow-wrap: anywhere; }
+.when { font-family: var(--display); font-weight: 700; font-size: 1.3rem; letter-spacing: .03em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.price { font-variant-numeric: tabular-nums; font-weight: 600; }
+.price.free { color: var(--free); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+.pill.uusi { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.pill.pian { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.right { display: grid; justify-items: end; align-content: start; gap: 4px; text-align: right; }
+/* Täyte kasvattaa osuma-alueen 44 px:iin muuttamatta ulkoasua. */
+.link { color: var(--accent); font-weight: 600; font-size: .92rem; text-decoration: none; display: inline-block; padding: 12px 8px; margin: -12px -8px; }
+.link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.note { grid-column: 1 / -1; font-size: .85rem; color: var(--muted); }
+.empty { color: var(--muted); padding: 24px 0; border-top: 3px solid var(--fg); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.empty p { flex: 1 1 100%; margin: 0; }
+footer { color: var(--muted); font-size: .88rem; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
+footer p { margin: 0; max-width: 70ch; }
+footer a { color: var(--accent); text-underline-offset: 2px; }
+
+@media (max-width: 560px) {
+  .card { grid-template-columns: 1fr; }
+  .right { justify-items: start; text-align: left; }
+  .reset, .field input, .field select { min-height: 44px; }
+  #q { width: 100%; }
+  .filters .field:first-child { flex: 1 1 100%; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 id="title"></h1>
+    <div class="range" id="range"></div>
+    <p class="meta" id="generated"></p>
+  </header>
+
+  <form class="filters" id="filters" autocomplete="off">
+    <div class="field">
+      <label for="q">Haku</label>
+      <input id="q" type="search" placeholder="näyttely, paikka tai taiteilija">
+    </div>
+    <div class="field">
+      <label for="venue">Paikka</label>
+      <select id="venue"><option value="">Kaikki paikat</option></select>
+    </div>
+    <label class="check" for="free"><input id="free" type="checkbox"> Vain ilmaiset</label>
+    <label class="check" for="fresh"><input id="fresh" type="checkbox"> Vain uudet</label>
+  </form>
+
+  <div class="bar">
+    <div class="count" id="count"></div>
+    <div class="sr-only" id="count-live" aria-live="polite"></div>
+    <button class="reset" id="clear" type="button" hidden>Tyhjennä suodattimet</button>
+  </div>
+
+  <main class="list" id="list"></main>
+
+  <footer id="footer"></footer>
+</div>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(function () {
+  document.documentElement.lang = "fi";
+  const data = JSON.parse(document.getElementById("data").textContent);
+  const rows = (data.exhibitions || []).filter((e) => e && e.name && e.venue);
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const isFree = (e) => /^\s*(ilmai|vapaa pääsy)/i.test(e.price || "");
+  const isNew = (e) => (e.tags || []).includes("Uusi");
+  const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+  for (const e of rows) e._hay = [e.name, e.venue, e.hours, e.note, e.dates].join(" ").toLowerCase();
+
+  // "Näyttelyt Oulussa" -> pieni "Näyttelyt" ja kaupunki julisteen kokoisena.
+  const title = (data.title || "Näyttelyt").trim();
+  const m = title.match(/^(näyttelyt)\s+(.+)$/i);
+  const city = el("span", "t2", m ? m[2] : title);
+  city.style.setProperty("--chars", [...city.textContent].length);
+  if (m) $("title").append(el("span", "t1", m[1]));
+  $("title").append(city);
+  $("range").textContent = data.range || "";
+  const g = (data.generated || "").split("-");
+  $("generated").textContent = g.length === 3 ? "Tiedot haettu " + +g[2] + "." + +g[1] + "." + g[0] : "";
+
+  const venues = [...new Set(rows.map((e) => e.venue))].sort((a, b) => a.localeCompare(b, "fi"));
+  for (const v of venues) { const o = el("option", null, v); o.value = v; $("venue").append(o); }
+
+  let announce;
+  function render() {
+    const words = $("q").value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const venue = $("venue").value, free = $("free").checked, fresh = $("fresh").checked;
+    const shown = rows.filter((e) => (!venue || e.venue === venue) && (!free || isFree(e)) && (!fresh || isNew(e)) && words.every((w) => e._hay.includes(w)));
+    const filtered = Boolean(words.length || venue || free || fresh);
+    $("clear").hidden = !filtered;
+    const total = filtered ? shown.length + " / " + plural(rows.length, "näyttely", "näyttelyä") : "Kaikki " + plural(rows.length, "näyttely", "näyttelyä");
+    $("count").textContent = total;
+    // Ruudunlukijalle tulos vasta kun kirjoittaminen taukoaa.
+    clearTimeout(announce);
+    announce = setTimeout(() => { $("count-live").textContent = total; }, 400);
+
+    const list = $("list");
+    list.replaceChildren();
+    if (!shown.length) {
+      const box = el("div", "empty");
+      box.append(el("p", null, rows.length ? "Mikään näyttely ei vastaa suodattimia." : "Tältä aikaväliltä ei löytynyt näyttelyitä."));
+      if (rows.length) {
+        const b = el("button", "reset", "Tyhjennä suodattimet");
+        b.type = "button"; b.addEventListener("click", resetFilters);
+        box.append(b);
+      }
+      list.append(box);
+      return;
+    }
+    for (const e of shown) {
+      const c = el("article", "card");
+      const left = el("div");
+      if ((e.tags || []).length) {
+        const t = el("div", "tags");
+        for (const x of e.tags) t.append(el("span", "pill" + (x === "Uusi" ? " uusi" : x === "Päättyy pian" ? " pian" : ""), x));
+        left.append(t);
+      }
+      left.append(el("div", "name", e.name), el("div", "where", e.venue));
+      if (e.hours && e.hours !== "–") left.append(el("div", "hours", e.hours));
+      const right = el("div", "right");
+      right.append(el("div", "when", e.dates || ""));
+      const price = e.price && e.price !== "–" ? e.price : "";
+      if (price) right.append(el("span", "price" + (isFree(e) ? " free" : ""), price));
+      if (e.url) {
+        const a = el("a", "link", "Linkki");
+        a.href = e.url; a.target = "_blank"; a.rel = "noopener";
+        a.setAttribute("aria-label", "Linkki: " + e.name + ", " + e.venue + " (avautuu uuteen välilehteen)");
+        right.append(a);
+      }
+      c.append(left, right);
+      if (e.note) c.append(el("div", "note", e.note));
+      list.append(c);
+    }
+  }
+
+  const f = $("footer");
+  for (const n of data.notes || []) f.append(el("p", null, n));
+  if ((data.sources || []).length) {
+    const p = el("p", null, "Lähteet: ");
+    data.sources.forEach((s, i) => {
+      if (i) p.append(", ");
+      if (s.url) { const a = el("a", null, s.name); a.href = s.url; a.target = "_blank"; a.rel = "noopener"; p.append(a); }
+      else p.append(s.name);
+    });
+    f.append(p);
+  }
+
+  function resetFilters() { $("filters").reset(); render(); $("q").focus(); }
+  $("clear").addEventListener("click", resetFilters);
+  $("filters").addEventListener("submit", (ev) => ev.preventDefault());
+  for (const id of ["q", "venue", "free", "fresh"]) $(id).addEventListener("input", render);
+  render();
+})();
+</script>
