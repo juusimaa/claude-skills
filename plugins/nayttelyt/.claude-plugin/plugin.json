@@ -1,0 +1,10 @@
+{
+  "name": "nayttelyt",
+  "version": "1.0.0",
+  "description": "/nayttelyt: kaupungin näyttelyt (taide, valokuva, museot) tältä viikolta tai valitulta aikaväliltä, uudet ja pian päättyvät merkittyinä, terminaaliin ja suodatettavalle web-sivulle.",
+  "author": {
+    "name": "Jouni Uusimaa"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["näyttelyt", "taide", "museot", "suomi"]
+}
