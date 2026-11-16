@@ -1,0 +1,10 @@
+{
+  "name": "elokuvat",
+  "version": "1.0.0",
+  "description": "/elokuvat: kaupungin elokuvateatterien näytökset tänä iltana tai tällä viikolla, Finnkino ja muut teatterit, terminaaliin ja suodatettavalle web-sivulle.",
+  "author": {
+    "name": "Jouni Uusimaa"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["elokuvat", "elokuvateatteri", "finnkino", "suomi"]
+}

@@ -3,7 +3,7 @@
   "owner": {
     "name": "Jouni Uusimaa"
   },
-  "description": "Claude Code plugins by Jouni Uusimaa: /orchestrate (plan, then implement in parallel with Haiku and Sonnet workers), /keikat (music gigs in Finnish cities) and /nayttelyt (exhibitions in Finnish cities).",
+  "description": "Claude Code plugins by Jouni Uusimaa: /orchestrate (plan, then implement in parallel with Haiku and Sonnet workers), /keikat (music gigs in Finnish cities), /nayttelyt (exhibitions in Finnish cities) and /elokuvat (cinema showtimes in Finnish cities).",
   "plugins": [
     {
       "name": "orchestrate",
@@ -19,6 +19,11 @@
       "name": "nayttelyt",
       "source": "./plugins/nayttelyt",
       "description": "/nayttelyt: exhibitions (art, photography, museums) in Finnish cities, new and closing-soon tagged."
+    },
+    {
+      "name": "elokuvat",
+      "source": "./plugins/elokuvat",
+      "description": "/elokuvat: cinema showtimes (Finnkino and independents) in Finnish cities, tonight or this week."
     }
   ]
 }
