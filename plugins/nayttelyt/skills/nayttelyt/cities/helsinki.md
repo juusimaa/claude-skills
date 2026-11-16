@@ -18,7 +18,7 @@ Kaikki luetaan tavallisella HTTP:llä (`curl -sL -A "nayttelyt-skill/1.1"` tai P
 `https://api.hel.fi/linkedevents/v1/event/?keyword=yso:p5121&division=helsinki&start=<alku>&end=<loppu>&include=location&page_size=100` (seuraa `meta.next`).
 
 - `yso:p5121` = "näyttelyt". Ilman `division=helsinki`-rajausta mukaan tulee Espoon kirjastoja (ks. Sudenkuopat).
-- Kentät: `name.fi`, `start_time` ja `end_time` (**UTC**, muunna `Europe/Helsinki`-aikaan), `location.name.fi`, `info_url.fi`, `offers[0].is_free` ja `price`, `super_event_type`.
+- Kentät: `name.fi`, `start_time` ja `end_time` (**UTC**, muunna `Europe/Helsinki`-aikaan), `location.name.fi`, `info_url.fi`, `offers[].is_free` ja `price`, `super_event` (päiväkohtaisen alitapahtuman kattotapahtuma).
 - Linkki: `info_url.fi`, jos tyhjä niin `https://tapahtumat.hel.fi/fi/events/<id>`.
 - Aukioloaikoja ei ole. Ne tulevat museoilta museot.fistä (lähde 2) ja gallerioilta lähteestä 3.
 - Paikkasääntö: ks. Sudenkuopat.
@@ -29,7 +29,7 @@ Kaikki luetaan tavallisella HTTP:llä (`curl -sL -A "nayttelyt-skill/1.1"` tai P
 
 - Kaupunkisuodatinta ei ole: haetaan maakunta Uusimaa ja pidetään kortit, joissa on `<span class="kunta">Helsinki</span>`. Loppupäivätön näyttely on pysyvä.
 - Museon sivulta `https://museot.fi/museohaku/index.php?museo_id=<id>` otetaan aukioloajat ja pääsymaksut (kerran per museo).
-- **TLS:** museot.fi lähettää vain oman varmenteensa (Telia RSA DV CA v4), joten curl ja Python hylkäävät sen. Skillin mukana tulee välivarmenne `certs/telia-rsa-dv-ca-v4.pem`: `curl --cacert <skillin kansio>/certs/telia-rsa-dv-ca-v4.pem` tai Pythonissa `ssl.create_default_context(cafile=...)`. Älä koskaan käytä `-k` tai `verify=False`.
+- **TLS:** museot.fi lähettää vain oman varmenteensa (Telia RSA DV CA v4), joten curl ja Python hylkäävät sen. Skillin mukana tulee välivarmenne `certs/telia-rsa-dv-ca-v4.pem`: `curl --cacert <skillin kansio>/certs/telia-rsa-dv-ca-v4.pem` tai Pythonissa `ctx = ssl.create_default_context(); ctx.load_verify_locations(cafile=...)` (lisää varmenteen järjestelmän luotettujen joukkoon, kuten skripti tekee). Älä koskaan käytä `-k` tai `verify=False`.
 - Tarkistus:
 
 ```bash
@@ -83,7 +83,7 @@ Isojen museoiden aukioloajat ja hinnat tulevat skriptin kautta museot.fistä (l�
 
 - **Linked Eventsin ajat ovat UTC:tä.** `start_time` voi olla edellisen päivän 21:00 tai 22:00 (talvi- ja kesäaika): muunna `Europe/Helsinki`-aikaan, tai alku on päivää liian aikainen.
 - **Ilman `division=helsinki`-rajausta tulee Espoon kirjastoja** (Sello, Tapiola, Entresse). Rajaus on pakollinen.
-- **Päivittäiset alitapahtumat kopioivat näyttelyn.** Näyttely, jolla on `super_event`, voi tulla yhtenä yhden päivän rivinä per päivä sekä yhtenä koko jakson rivinä. Pudota yhden päivän rivit ja pidä koko jakson rivi. Pudota myös nimet, joissa on `kierros`, `työpaja`, `opastus`, `luento`, `esittely`, `tapaaminen`.
+- **Päivittäiset alitapahtumat kopioivat näyttelyn.** Näyttely, jolla on `super_event`, voi tulla yhtenä yhden päivän rivinä per päivä sekä yhtenä koko jakson rivinä. Pudota yhden päivän rivit ja pidä koko jakson rivi. Skripti pudottaa myös nimet, joissa on esim. `kierros`, `virtuaali`, `työpaja`, `opastus`, `luento`, `esittely`, `tapaaminen` (molemmista lähteistä), sekä toistuvat ohjelmat kuten `ilmaispäivä` ja `treffiperjantai`.
 - **Paikkasääntö.** Pudota haarakirjastot ja asukas- ja yhteisötalot, seniorikeskukset yms. Pidä Oodi ja kulttuurikeskukset: Stoa, Malmitalo, Caisa, Kanneltalo, Annantalo, Maunula-talo, Vuotalo, Savoy.
 - **Sama paikka eri nimellä kahdessa lähteessä.** Esim. `Helsingin taidemuseo HAM` (Linked Events) ja `HAM Helsingin taidemuseo` (museot.fi), samoin LUOMUS. Yhdistä nimen ja paikan mukaan aliaslistalla, ja pidä rivi, jossa on aukioloajat, hinta ja linkki.
 - **museot.fin varmenne.** Ilman mukana tulevaa välivarmennetta curl ja Python epäonnistuvat. Käytä `certs/telia-rsa-dv-ca-v4.pem`, älä koskaan `-k`.

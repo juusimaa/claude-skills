@@ -72,6 +72,39 @@ class Parsers(unittest.TestCase):
 
 
 class Readers(unittest.TestCase):
+    def test_end_at_local_midnight_is_previous_day(self):
+        self.assertEqual(hki.end_day("2026-12-20T22:00:00Z"), "2026-12-20")  # 00:00 Suomen aikaa
+        self.assertEqual(hki.end_day("2026-12-20T16:00:00Z"), "2026-12-20")
+
+    def test_bad_event_does_not_crash(self):
+        ev = {"id": "x:1", "name": {"fi": None, "sv": None}, "location": {"name": {"fi": None}},
+              "start_time": "2026-11-01T08:00:00Z", "end_time": "2026-12-01T16:00:00Z"}
+        self.assertEqual(hki.parse_linkedevents([ev]), [])
+
+    def test_noise_is_helsinki_specific(self):
+        ev = lambda n: {"id": "x:2", "name": {"fi": n}, "location": {"name": {"fi": "Galleria Huuto"}},
+                        "start_time": "2026-11-01T08:00:00Z", "end_time": "2026-12-01T16:00:00Z", "offers": []}
+        self.assertEqual(len(hki.parse_linkedevents([ev("Talven lumo")])), 1)
+        self.assertEqual(hki.parse_linkedevents([ev("Museon virtuaalikierros")]), [])
+
+    def test_museot_noise_and_dash_variants(self):
+        card = lambda nid, name, dates: (f'<a class="normaali" href="/nayttelykalenteri/index.php?nayttely_id={nid}">'
+                                         f'<h2>{name}</h2><p class="paikka">Museo X, <span class="kunta">Helsinki</span></p>'
+                                         f'<p class="ajankohta">{dates}</p></a>')
+        rows = hki.parse_museot_list(card(1, "Muutosta ilmassa 360 ° - virtuaalikierros", "15.2.2021 &#8211; ")
+                                     + card(2, "Pysyvä A", "1.1.2020 – ") + card(3, "Pysyvä B", "1.1.2020 &ndash; "))
+        self.assertEqual([(r["name"], r["permanent"]) for r in rows], [("Pysyvä A", True), ("Pysyvä B", True)])
+
+    def test_hours_drop_leading_zero(self):
+        html = ('<table class="aukioloajat"><tr><td>Ma&nbsp;</td><td>08:00-15:30</td></tr>'
+                '<tr><td>Ti&nbsp;</td><td>Suljettu</td></tr></table>')
+        self.assertEqual(hki.parse_museum_page(html)[0], "ma 8–15:30, ti suljettu")
+
+    def test_linkedevents_row_gets_venue_hours(self):
+        with mock.patch.dict(hki.VENUE_INFO, {"Galerie Forsblom": ("ti–pe 11–18", "–")}):
+            rows = hki.parse_linkedevents(EVENTS)
+        self.assertTrue(all(r["hours"] == "ti–pe 11–18" for r in rows if r["venue"] == "Galerie Forsblom"))
+
     def test_museot_context_trusts_bundle(self):
         ctx = hki.museot_context()
         self.assertEqual(ctx.verify_mode, ssl.CERT_REQUIRED)

@@ -40,11 +40,16 @@ def this_week(today: date) -> tuple[date, date]:
     return today, today + timedelta(days=6 - today.weekday())
 
 
-def overlaps(e: dict, frm: date, to: date) -> bool:
-    if e.get("permanent"):
-        return True
+def span(e: dict) -> tuple[date, date]:
+    """Rivin aikaväli; puuttuva alku tai loppu on avoin (pysyvän rivin loppu aina avoin)."""
     s = date.fromisoformat(e["start"]) if e.get("start") else date.min
-    t = date.fromisoformat(e["end"]) if e.get("end") else date.max
+    t = date.fromisoformat(e["end"]) if e.get("end") and not e.get("permanent") else date.max
+    return s, t
+
+
+def overlaps(e: dict, frm: date, to: date) -> bool:
+    # Pysyväkin rivi tarvitsee alkupäivän tarkistuksen: "28.11.2026 –" ei ole auki viikolla 16.–22.11.
+    s, t = span(e)
     return s <= to and t >= frm
 
 
@@ -53,26 +58,42 @@ def name_key(name: str) -> str:
     return " ".join(re.sub(r"[^\w]+", " ", fold(name)).split())
 
 
-def same_exhibition(a: str, b: str) -> bool:
-    """Sama näyttely samassa paikassa: nimet samat tai toinen sisältää toisen ("Luova Tuho" / "Luova Tuho – Johan …")."""
-    a, b = name_key(a), name_key(b)
-    short, long_ = sorted((a, b), key=len)
-    return a == b or (len(short) >= 8 and f" {short} " in f" {long_} ")
+def contains_name(a: str, b: str) -> bool:
+    """Toinen nimi sisältää toisen kokonaisina sanoina ("Luova Tuho" / "Luova Tuho – Johan …")."""
+    short, long_ = sorted((name_key(a), name_key(b)), key=len)
+    return len(short) >= 8 and f" {short} " in f" {long_} "
 
 
 def merge(rows: list[dict]) -> list[dict]:
-    """Yhdistää saman näyttelyn rivit (sama paikka, sama tai sisältyvä nimi). Ensimmäinen rivi voittaa, puuttuvat
-    kentät täytetään myöhemmistä."""
+    """Yhdistää saman näyttelyn rivit: sama paikka, aikavälit kohtaavat, ja nimi on sama tai (eri lähteestä)
+    toinen sisältää toisen. Ensimmäinen rivi voittaa, puuttuvat kentät täytetään myöhemmistä. Sisältyvä nimi
+    yhdistetään vain kerran per lähde, jotta "X – A" ja "X – B" samasta lähteestä eivät sulaudu "X":ään."""
     out: list[dict] = []
+    absorbed: list[set] = []  # kunkin säilytetyn rivin lähteet
     for r in rows:
-        hit = next((o for o in out if fold(o["venue"]) == fold(r["venue"])
-                    and o.get("permanent") == r.get("permanent") and same_exhibition(o["name"], r["name"])), None)
+        rs, rt = span(r)
+        hit = None
+        for i, o in enumerate(out):
+            if fold(o["venue"]) != fold(r["venue"]):
+                continue
+            os_, ot = span(o)
+            if not (os_ <= rt and rs <= ot):
+                continue
+            if name_key(o["name"]) == name_key(r["name"]) or (
+                    r.get("source") not in absorbed[i] and contains_name(o["name"], r["name"])):
+                hit = i
+                break
         if hit is None:
             out.append(dict(r))
+            absorbed.append({r.get("source")})
             continue
+        o = out[hit]
+        absorbed[hit].add(r.get("source"))
         for f, v in r.items():
-            if hit.get(f) in ("", "–", None) and v not in ("", "–", None):
-                hit[f] = v
+            if o.get(f) in ("", "–", None) and v not in ("", "–", None):
+                o[f] = v
+        if r.get("permanent") or o.get("permanent"):
+            o["permanent"], o["end"] = True, ""  # pysyvällä ei loppupäivää, vaikka toinen lähde antaisi
     return out
 
 

@@ -58,22 +58,55 @@ class T(unittest.TestCase):
         self.assertIn("broken: boom", err.getvalue())
         self.assertEqual([r["name"] for r in json.loads(out.getvalue())], ["A"])
 
+    @staticmethod
+    def _r(n, v="Museo X", src="museot.fi", s="2026-10-01", e="2027-01-31", perm=False, **kw):
+        return {"name": n, "venue": v, "source": src, "start": s, "end": e, "permanent": perm,
+                "hours": "–", "url": "", **kw}
+
     def test_merge_variant_titles(self):
-        r = lambda n, v, h="–", u="": {"name": n, "venue": v, "permanent": False, "hours": h, "url": u}
-        m = y.merge([r("Aalto Design – Hyvinvoinnin muodot", "Designmuseo", h="ti–su 11–18"),
-                     r("Aalto Design - Hyvinvoinnin muodot", "Designmuseo", u="https://a"),
-                     r("Luova Tuho – Johan Eichhornin valokuvasarja", "Museo X", h="ti 12–16"),
-                     r("Luova Tuho", "Museo X", u="https://b"),
-                     r("Luova Tuho", "Toinen paikka"),
-                     r("Kevät", "Museo X")])
-        self.assertEqual(len(m), 4)
+        r = self._r
+        m = y.merge([r("Aalto Design – Hyvinvoinnin muodot", hours="ti–su 11–18"),
+                     r("Aalto Design - Hyvinvoinnin muodot", src="Linked Events", url="https://a")])
+        self.assertEqual(len(m), 1)
         self.assertEqual((m[0]["hours"], m[0]["url"]), ("ti–su 11–18", "https://a"))
-        self.assertEqual((m[1]["hours"], m[1]["url"]), ("ti 12–16", "https://b"))
+
+    def test_merge_contained_name_across_sources(self):
+        r = self._r
+        m = y.merge([r("Luova Tuho", hours="ti 12–16"), r("Luova Tuho – Johan Eichhorn", src="Linked Events", url="https://b"),
+                     r("Luova Tuho", v="Toinen paikka")])
+        self.assertEqual(len(m), 2)
+        self.assertEqual((m[0]["hours"], m[0]["url"]), ("ti 12–16", "https://b"))
+
+    def test_merge_does_not_swallow_siblings(self):
+        r = self._r
+        m = y.merge([r("Luova Tuho"), r("Luova Tuho – A", src="Linked Events"), r("Luova Tuho – B", src="Linked Events")])
+        self.assertEqual([x["name"] for x in m], ["Luova Tuho", "Luova Tuho – B"])
+        # Saman lähteen sisältyvät nimet eivät yhdisty lainkaan.
+        self.assertEqual(len(y.merge([r("Syyssalonki"), r("Syyssalonki 2026")])), 2)
+
+    def test_merge_needs_overlapping_dates(self):
+        r = self._r
+        m = y.merge([r("Syyssalonki", s="2025-09-01", e="2025-10-01"),
+                     r("Syyssalonki", src="Linked Events", s="2026-09-01", e="2026-10-01")])
+        self.assertEqual(len(m), 2)
+
+    def test_merge_permanent_with_dated(self):
+        r = self._r
+        m = y.merge([r("Kokoelmanäyttely Ajan kysymys", s="2023-04-14", e="", perm=True, hours="ti 10–18"),
+                     r("Ajan kysymys", src="Linked Events", s="2023-04-14", e="2026-12-31", url="https://c")])
+        self.assertEqual(len(m), 1)
+        self.assertEqual((m[0]["permanent"], m[0]["end"], m[0]["url"]), (True, "", "https://c"))
 
     def test_merge_keeps_short_distinct_names(self):
-        r = lambda n: {"name": n, "venue": "V", "permanent": False}
-        self.assertEqual(len(y.merge([r("Uni"), r("Unikuvia ja muuta")])), 2)
+        r = self._r
+        self.assertEqual(len(y.merge([r("Uni"), r("Unikuvia ja muuta", src="Linked Events")])), 2)
 
+    def test_overlaps_permanent_not_yet_open(self):
+        from datetime import date
+        frm, to = date(2026, 11, 16), date(2026, 11, 22)
+        self.assertFalse(y.overlaps({"start": "2026-11-28", "end": "", "permanent": True}, frm, to))
+        self.assertTrue(y.overlaps({"start": "2022-09-21", "end": "", "permanent": True}, frm, to))
+        self.assertTrue(y.overlaps({"start": "", "end": "", "permanent": True}, frm, to))
 
 if __name__ == "__main__":
     unittest.main()

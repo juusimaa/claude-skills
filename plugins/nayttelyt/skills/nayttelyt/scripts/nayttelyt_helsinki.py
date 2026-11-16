@@ -12,11 +12,10 @@ import pathlib
 import re
 import ssl
 import sys
-from datetime import date
+from datetime import date, datetime, timedelta
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))  # -I jättää skriptin kansion pois
-from yhteiset import fetch, fold, helsinki_day, overlaps, run, text  # noqa: E402
-from nayttelyt_oulu import NOISE  # noqa: E402
+from yhteiset import FI, fetch, fold, helsinki_day, overlaps, run, text  # noqa: E402
 
 CERT = pathlib.Path(__file__).resolve().parent.parent / "certs" / "telia-rsa-dv-ca-v4.pem"
 LINKED = ("https://api.hel.fi/linkedevents/v1/event/?keyword=yso:p5121&division=helsinki"
@@ -24,6 +23,9 @@ LINKED = ("https://api.hel.fi/linkedevents/v1/event/?keyword=yso:p5121&division=
 MUSEOT = "https://museot.fi"
 MUSEOT_LIST = MUSEOT + "/nayttelykalenteri/index.php?maakunta_id=1&nayttelyhaku=1&kaikki=1"  # 1 = Uusimaa
 DROP_VENUE = re.compile(r"kirjasto|yhteisotalo|asukast|seniorikeskus|palvelukeskus|perhetalo|musiikkiopisto|^internet$", re.I)
+# Kertatapahtumat ja ohjelma, ei näyttelyitä (Oulun NOISE ilman Oulu-sanoja kuten "lumo"; lisäksi virtuaalikierrokset).
+NOISE = re.compile(r"esittely|työpaja|opastus|opastettu|kierros|luento|esitelmä|kurssi|elokuva|festivaali|tapaaminen"
+                   r"|verkkonäyttely|virtuaali|julkistus", re.I)
 # Toistuvat ohjelmat, joita Linked Events kutsuu näyttelyiksi (Kiasma, Arkkitehtuuri- ja designmuseo, Suomenlinna).
 PROGRAMME = re.compile(r"ilmaispäivä|ilmaisilta|treffiperjantai|museorasti", re.I)
 OODI = "keskustakirjasto oodi"
@@ -35,6 +37,10 @@ ALIASES = {
     "median museo ja arkisto merkki": "Merkki",
     "tiedemuseo liekin observatorio": "Tiedemuseo Liekki, Observatorio",
 }
+MAX_PAGES = 20
+# museot()-lukija täyttää: paikka -> (aukioloajat, hinta). linkedevents() käyttää samoja aikoja saman paikan
+# riveille, joten READERS-järjestys on museot ensin.
+VENUE_INFO: dict = {}
 
 
 def row(name, venue, start="", end="", permanent=False, hours="–", price="–", url="", note="", source=""):
@@ -49,15 +55,16 @@ def canon_venue(name: str) -> str:
 def parse_linkedevents(events: list[dict]) -> list[dict]:
     out = []
     for e in events:
-        name = (e["name"].get("fi") or next(iter(e["name"].values()), "")).strip()
-        venue = ((e.get("location") or {}).get("name") or {}).get("fi", "").strip()
-        if e.get("super_event") or not e.get("start_time") or NOISE.search(name) or PROGRAMME.search(name):
+        names = e.get("name") or {}
+        name = (names.get("fi") or next((v for v in names.values() if v), "") or "").strip()
+        venue = (((e.get("location") or {}).get("name") or {}).get("fi") or "").strip()
+        if not name or e.get("super_event") or not e.get("start_time") or NOISE.search(name) or PROGRAMME.search(name):
             continue  # päiväkohtaiset alitapahtumat ja opastukset pois, kattotapahtuma jää
         fv = fold(venue)
         if DROP_VENUE.search(fv) and OODI not in fv:
             continue
         start = helsinki_day(e["start_time"])
-        end = helsinki_day(e["end_time"]) if e.get("end_time") else start
+        end = end_day(e["end_time"]) if e.get("end_time") else start
         if start == end:
             continue
         offers = e.get("offers") or []
@@ -66,8 +73,16 @@ def parse_linkedevents(events: list[dict]) -> list[dict]:
         if price.startswith("http"):  # hintakenttään on joskus laitettu lippukauppa
             price = "–"
         url = (e.get("info_url") or {}).get("fi") or "https://tapahtumat.hel.fi/fi/events/" + e["id"]
-        out.append(row(name, canon_venue(venue), start, end, price=price, url=url, source="Linked Events"))
+        venue = canon_venue(venue)
+        hours = VENUE_INFO.get(venue, ("–", "–"))[0]
+        out.append(row(name, venue, start, end, hours=hours, price=price, url=url, source="Linked Events"))
     return out
+
+
+def end_day(ts: str) -> str:
+    """Loppupäivä Suomen aikaa; tasan keskiyö (00:00) tarkoittaa edellisen päivän loppua."""
+    t = datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(FI)
+    return (t.date() - timedelta(days=1) if (t.hour, t.minute) == (0, 0) else t.date()).isoformat()
 
 
 def parse_museot_list(html: str) -> list[dict]:
@@ -78,13 +93,13 @@ def parse_museot_list(html: str) -> list[dict]:
         if not m or text(m.group(3)) != "Helsinki":
             continue
         name, venue = text(m.group(1)), text(m.group(2))
-        if name.lower().startswith("verkkonäyttely"):
+        if name.lower().startswith("verkkonäyttely") or NOISE.search(name):
             continue
         d = re.findall(r"(\d+)\.(\d+)\.(\d{4})", m.group(4))
         if not d:
             continue
         iso = [date(int(y), int(mo), int(dd)).isoformat() for dd, mo, y in d]
-        permanent = len(iso) == 1 and "&#8211;" in m.group(4)  # "28.11.2026 – ": ei loppupäivää
+        permanent = len(iso) == 1 and bool(re.search(r"&#8211;|&ndash;|[–-]", m.group(4)))  # "28.11.2026 – "
         out.append(row(name, venue, iso[0], "" if permanent else iso[-1], permanent=permanent,
                        url=f"{MUSEOT}/nayttelykalenteri/index.php?nayttely_id={nid}", source="museot.fi"))
     return out
@@ -100,7 +115,7 @@ def parse_museum_page(html: str) -> tuple[str, str]:
     t = re.search(r'<table class="aukioloajat">(.*?)</table>', html, re.S)
     for day, val in re.findall(r"<tr><td>(.*?)</td><td>(.*?)</td></tr>", t.group(1) if t else "", re.S):
         day = text(day).lower()
-        val = re.sub(r":00\b", "", text(val).lower()).replace("-", "–")
+        val = re.sub(r"\b0(\d)", r"\1", re.sub(r":00\b", "", text(val).lower())).replace("-", "–")
         if groups and groups[-1][2] == val:
             groups[-1][1] = day
         else:
@@ -123,12 +138,14 @@ def museot_context() -> ssl.SSLContext:
 
 def linkedevents(frm: date, to: date) -> list[dict]:
     url, events = LINKED.format(frm, to), []
-    for _ in range(20):
+    for _ in range(MAX_PAGES):
         page = json.loads(fetch(url))
         events += page["data"]
         url = (page.get("meta") or {}).get("next")
         if not url:
             break
+    else:
+        print(f"linkedevents: yli {MAX_PAGES} sivua, loput jäivät pois", file=sys.stderr)
     return parse_linkedevents(events)
 
 
@@ -146,6 +163,7 @@ def museot(frm: date, to: date) -> list[dict]:
                 print(f"museot: {r['venue']}: {ex}", file=sys.stderr)
                 info[r["venue"]] = ("–", "–")
         r["hours"], r["price"] = info[r["venue"]]
+    VENUE_INFO.update(info)
     return rows
 
 

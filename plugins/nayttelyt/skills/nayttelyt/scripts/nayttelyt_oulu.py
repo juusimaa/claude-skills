@@ -38,20 +38,8 @@ VALVE_HOURS = "ma–pe 9–21, la–su 10–21"
 VENUE_INFO = {MUSEO: (MUSEO_HOURS, MUSEO_PRICE), TIIMA: (TIIMA_HOURS, TIIMA_PRICE), VALVE: (VALVE_HOURS, "Ilmainen")}
 
 
-
-
-
-
-
-
-
-
-
-
 def is_exhibition(name: str, start: str, end: str) -> bool:
     return start != end and not NOISE.search(name)
-
-
 
 
 def row(name, venue, start="", end="", permanent=False, hours="", price="–", url="", note="", source=""):
@@ -79,8 +67,6 @@ def cap(r: dict) -> dict:
     if r["venue"] == VALVE and (not r["end"] or r["end"] > VALVE_CLOSES):
         r["end"] = VALVE_CLOSES
     return r
-
-
 
 
 def tapahtumapalvelu(frm: date, to: date) -> list[dict]:
