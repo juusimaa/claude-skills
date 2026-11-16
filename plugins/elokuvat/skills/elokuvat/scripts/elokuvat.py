@@ -21,7 +21,8 @@ import urllib.request
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+# Rehellinen asiakasnimi: nytleffaan.fi katkaisee yhteyden selaimeksi tekeytyvältä User-Agentilta.
+UA = "elokuvat-skill/1.0 (+https://github.com/juusimaa/claude-skills)"
 FI = ZoneInfo("Europe/Helsinki")
 WEEKEND_WARNING = "Viikonlopun näytöksiä on vielä vähän: teatterit julkaisevat ne yleensä viikon loppupuolella."
 WD = "ma ti ke to pe la su".split()
