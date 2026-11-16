@@ -1,11 +1,13 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__TITLE__</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap">
 <style>
-/* Layout: julisteyläosa, päiväpainikkeet, suodattimet ja yksi kortti per elokuva valitulle päivälle. */
+/* Layout: julisteyläosa, päiväpainikkeet, suodattimet ja yksi kortti per elokuva valitulle päivälle.
+   Tänään kortit ryhmitellään seuraavan näytöksen mukaan: seuraavat 2 tuntia, myöhemmin tänään, jo alkaneet. */
 :root {
   --bg: #f3f5f7;
   --surface: #ffffff;
@@ -72,25 +74,14 @@ h1 .t2 { font-size: clamp(2rem, calc(100cqi / (var(--chars, 10) * .52)), 6rem); 
 .list { display: grid; }
 .group { font-family: var(--display); font-weight: 700; font-size: 1.15rem; text-transform: uppercase; letter-spacing: .08em; margin: 0; padding: 40px 0 10px; border-bottom: 3px solid var(--fg); }
 .group:first-child { padding-top: 0; }
-/* Ruoste kuuluu ajalle: otsikon päivät, päättyvät näyttelyt ja niiden ryhmä. */
-.group.pian { border-bottom-color: var(--accent); }
-.card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 14px 0; border-top: 1px solid var(--line); }
+/* Ruoste kuuluu ajalle: otsikon päivät ja tänään pian alkavien ryhmä. */
+.group.soon { border-bottom-color: var(--accent); }
+.card { padding: 14px 0; border-top: 1px solid var(--line); }
 .group + .card { border-top: 0; }
 .name { font-weight: 600; font-size: 1.1rem; line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
-.where, .hours { color: var(--muted); font-size: .92rem; overflow-wrap: anywhere; }
-.unknown { color: var(--muted); font-size: .92rem; font-style: italic; }
-.when { font-family: var(--display); font-weight: 700; font-size: 1.3rem; letter-spacing: .03em; font-variant-numeric: tabular-nums; }
-.price { font-variant-numeric: tabular-nums; font-weight: 600; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
 .pill { font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); white-space: nowrap; }
-.pill.pian { color: var(--tag-fg); background: color-mix(in srgb, var(--accent) 14%, transparent); }
-.pill.avautuu { color: var(--fg); background: transparent; box-shadow: inset 0 0 0 1px var(--field-line); }
-.right { display: grid; justify-items: end; align-content: start; gap: 4px; text-align: right; }
-/* Täyte kasvattaa osuma-alueen 44 px:iin muuttamatta ulkoasua. */
-.link { color: var(--fg); font-weight: 600; font-size: .92rem; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; display: inline-block; padding: 12px 8px; margin: -12px -8px; }
-/* Rengas tekstin ympärille, ei näkymättömän osuma-alueen: muuten se peittää hinnan. */
-.link:focus-visible { outline-offset: -6px; }
-@media (hover: hover) { .link:hover { color: var(--accent); } }
+.pill.new { color: var(--tag-fg); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .note { font-size: .85rem; color: var(--muted); max-width: 70ch; }
 .note.warn { color: var(--fg); font-weight: 600; }
 .empty { color: var(--muted); padding: 24px 0; border-top: 3px solid var(--fg); }
@@ -100,46 +91,6 @@ footer p { margin: 0; max-width: 70ch; text-wrap: pretty; }
 footer a { color: var(--fg); text-decoration-color: var(--accent); text-underline-offset: 2px; }
 
 @media (max-width: 560px) {
-  .card { grid-template-columns: 1fr; }
-  .right { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; text-align: left; }
-  .reset, .field input, .field select { min-height: 44px; }
-  #q { width: 100%; }
-  .filters { padding: 12px; gap: 8px 14px; }
-  .filters .field { flex: 1 1 100%; }
-  #venue { max-width: none; }
-  header { padding-bottom: 12px; }
-  .more { flex: 1 1 100%; }
-  .more > summary { display: list-item; padding-block: 11px; cursor: pointer; font-weight: 600; font-size: .95rem; color: var(--fg); }
-  .more > summary::marker { color: var(--accent); }
-  .more[open] > summary { margin-bottom: 8px; }
-}
-@media print {
-  .filters, .bar { display: none; }
-  body { background: #fff; }
-}
-.days { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; }
-.day { font: inherit; font-size: .95rem; font-weight: 600; color: var(--fg); background: var(--surface); border: 1px solid var(--field-line); border-radius: 999px; padding: 8px 14px; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
-.day[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-.cinema { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 8px; }
-.cname { font-size: .92rem; color: var(--muted); font-weight: 600; min-width: 6rem; }
-.times { display: flex; flex-wrap: wrap; gap: 4px 6px; }
-.time { font-family: var(--display); font-weight: 700; font-size: 1.2rem; letter-spacing: .03em; font-variant-numeric: tabular-nums; color: var(--fg); padding: 6px 10px; border-radius: 6px; background: var(--chip); text-decoration: none; display: inline-block; min-width: 44px; text-align: center; }
-a.time { box-shadow: inset 0 -2px 0 var(--accent); }
-@media (hover: hover) { a.time:hover { color: var(--accent); } }
-.time.past { opacity: .5; }
-.tnote { font-size: .78rem; color: var(--muted); }
-.sub { color: var(--muted); font-size: .92rem; }
-.alert { padding: 12px 14px; border: 2px solid var(--accent); border-radius: 8px; background: var(--surface); font-weight: 600; }
-.alert[hidden] { display: none; }
-.note { font-size: .85rem; color: var(--muted); max-width: 70ch; }
-.empty { color: var(--muted); padding: 24px 0; border-top: 3px solid var(--fg); }
-.empty p { margin: 0; }
-footer { color: var(--muted); font-size: .88rem; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
-footer p { margin: 0; max-width: 70ch; text-wrap: pretty; }
-footer a { color: var(--fg); text-decoration-color: var(--accent); text-underline-offset: 2px; }
-
-@media (max-width: 560px) {
-  .card { grid-template-columns: 1fr; }
   .reset, .field input, .field select { min-height: 44px; }
   #q { width: 100%; }
   .filters { padding: 12px; gap: 8px 14px; }
@@ -155,6 +106,35 @@ footer a { color: var(--fg); text-decoration-color: var(--accent); text-underlin
   .filters, .bar, .days { display: none; }
   body { background: #fff; }
 }
+/* Päivärivi pysyy näkyvissä vierittäessä, joten päivää voi vaihtaa listan keskeltä. */
+.days { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 8px 0; position: sticky; top: 0; z-index: 1; background: var(--bg); }
+.days[hidden] { display: none; }
+@media (max-width: 560px) {
+  /* Puhelimella yksi vieritettävä rivi kolmen rivitetyn sijaan; reunasta reunaan, jotta vieritys näkyy. */
+  .days { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
+  .days::-webkit-scrollbar { display: none; }
+  .day { flex: none; }
+}
+.day { font: inherit; font-size: .95rem; font-weight: 600; color: var(--fg); background: var(--surface); border: 1px solid var(--field-line); border-radius: 999px; padding: 8px 14px; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.day[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+@media (hover: hover) { .day:hover, .reset:hover { border-color: var(--fg); } }
+.cinema { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 8px; }
+.cname { font-size: .92rem; color: var(--muted); font-weight: 600; min-width: 6rem; }
+.times { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Lippu-sirussa kellonaika ja sali allekkain: sali näkyy myös kosketusnäytöllä, ja korkeus riittää 44 px:n osuma-alueeseen. */
+.time { font-family: var(--display); font-weight: 700; font-size: 1.2rem; line-height: 1.05; letter-spacing: .03em; font-variant-numeric: tabular-nums; color: var(--fg); padding: 5px 10px; border-radius: 6px; background: var(--chip); text-decoration: none; display: inline-grid; justify-items: center; align-content: center; min-width: 52px; min-height: 44px; }
+.time .hall { font-family: var(--body); font-size: .7rem; font-weight: 600; letter-spacing: .02em; color: var(--muted); white-space: nowrap; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; }
+.empty .reset { margin-top: 12px; }
+a.time { box-shadow: inset 0 -2px 0 var(--accent); }
+/* Ilman lippulinkkiä: ei täyttöä, katkoviiva kertoo ettei sirua voi painaa. */
+span.time { background: transparent; border: 1px dashed var(--field-line); padding: 4px 9px; }
+@media (hover: hover) { a.time:hover { color: var(--accent); } }
+/* Alkanut näytös hiljenee värillä eikä läpinäkyvyydellä: teksti pysyy yli 4.5:1. */
+.time.past { color: var(--muted); background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.tnote { font-size: .78rem; color: var(--muted); }
+.sub { color: var(--muted); font-size: .92rem; }
+.alert { padding: 12px 14px; border: 2px solid var(--accent); border-radius: 8px; background: var(--surface); font-weight: 600; }
+.alert[hidden] { display: none; }
 </style>
 
 <div class="wrap">
@@ -192,6 +172,8 @@ footer a { color: var(--fg); text-decoration-color: var(--accent); text-underlin
     <button class="reset" id="clear" type="button" hidden>Tyhjennä suodattimet</button>
   </div>
 
+  <p class="note warn" id="daynote" hidden></p>
+
   <main class="list" id="list"></main>
 
   <footer id="footer"></footer>
@@ -228,22 +210,39 @@ footer a { color: var(--fg); text-decoration-color: var(--accent); text-underlin
   const day0 = new Date(data.from + "T12:00:00"), day1 = new Date(data.to + "T12:00:00");
   const days = [];
   if (!isNaN(day0) && !isNaN(day1)) for (let d = new Date(day0); d <= day1 && days.length < 62; d.setDate(d.getDate() + 1)) days.push(new Date(d));
-  $("range").textContent = days.length ? dm(day0) + "–" + dm(day1) + day1.getFullYear() : "";
-  const g = (data.generated || "").split("T")[0].split("-");
-  $("generated").textContent = g.length === 3 ? "Tiedot haettu " + +g[2] + "." + +g[1] + "." + g[0] : "";
+  const sameMonth = day0.getMonth() === day1.getMonth() && day0.getFullYear() === day1.getFullYear();
+  $("range").textContent = days.length ? (sameMonth ? day0.getDate() + "." : dm(day0)) + "–" + dm(day1) + day1.getFullYear() : "";
+  const gen = data.generated || "", g = gen.split("T")[0].split("-");
+  $("generated").textContent = g.length === 3 ? "Tiedot haettu " + +g[2] + "." + +g[1] + "." + g[0] + (gen.length >= 16 ? " klo " + fi(gen) : "") : "";
 
   const venues = [...new Set(scr.map((s) => s.cinema))].sort((a, b) => a.localeCompare(b, "fi"));
   for (const v of venues) { const o = el("option", null, v); o.value = v; $("venue").append(o); }
 
   const wide = matchMedia("(min-width: 561px)");
-  const syncMore = () => { if (wide.matches) $("more").open = true; };
+  const syncMore = () => { $("more").open = wide.matches; };
   wide.addEventListener("change", syncMore);
   syncMore();
 
   const now = new Date();
-  const todayIso = iso(now), nowHM = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+  const todayIso = iso(now), nowMin = now.getHours() * 60 + now.getMinutes();
+  const mins = (s) => +s.start.slice(11, 13) * 60 + +s.start.slice(14, 16);
+  const isPast = (s) => s.start.slice(0, 10) === todayIso && mins(s) < nowMin;
+  const nextOf = (ss) => ss.find((s) => !isPast(s));
+  const vIdx = (v) => venues.indexOf(v);
   let sel = days.length ? (days.find((d) => iso(d) === todayIso) || days[0]) : null;
-  const noTimes = !scr.length;
+  // Ilman päivämääriä päiväpainikkeita ei voi tehdä: näytetään pelkkä elokuvaluettelo.
+  const noTimes = !scr.length || !days.length;
+  const dayName = (d) => iso(d) === todayIso ? "Tänään" : WD[d.getDay()] + " " + dm(d);
+  const perDay = new Map();
+  for (const s of scr) perDay.set(s.start.slice(0, 10), (perDay.get(s.start.slice(0, 10)) || 0) + 1);
+  const busiest = Math.max(0, ...perDay.values());
+  // Uusi elokuva, jonka ensi-ilta on vasta tulossa, kerrotaan päivänä: "Ensi-ilta to 19.11.".
+  const newLabel = (f) => {
+    if (!f.premiere || f.premiere < todayIso) return "Uusi";
+    const d = new Date(f.premiere + "T12:00:00");
+    return f.premiere === todayIso ? "Ensi-ilta tänään" : "Ensi-ilta " + WD[d.getDay()] + " " + dm(d);
+  };
+  const ageText = (a) => !a ? "Ikäraja ei tiedossa" : a === "sallittu" ? "Sallittu" : "Ikäraja " + a;
 
   function drawDays() {
     const box = $("days");
@@ -251,11 +250,12 @@ footer a { color: var(--fg); text-decoration-color: var(--accent); text-underlin
     if (noTimes) { box.hidden = true; return; }
     for (const d of days) {
       const isToday = iso(d) === todayIso;
-      const b = el("button", "day", isToday ? "Tänään" : WD[d.getDay()] + " " + dm(d));
+      const b = el("button", "day", dayName(d));
       b.type = "button";
       b.setAttribute("aria-pressed", String(sel && iso(d) === iso(sel)));
       if (isToday) b.setAttribute("aria-label", "Tänään " + WD[d.getDay()] + " " + dm(d));
-      b.addEventListener("click", () => { sel = d; drawDays(); render(); });
+      // Ei uudelleenpiirtoa: vieritetyn päivärivin kohta säilyy.
+      b.addEventListener("click", () => { sel = d; for (const x of box.children) x.setAttribute("aria-pressed", String(x === b)); render(); });
       box.append(b);
     }
   }
@@ -275,7 +275,10 @@ footer a { color: var(--fg); text-decoration-color: var(--accent); text-underlin
     if (noTimes) {
       cards = films.filter(fOk).map((f) => ({ f, first: "", by: [] }));
     } else {
-      const dayIso = iso(sel), per = new Map();
+      const dayIso = iso(sel), per = new Map(), n = perDay.get(dayIso) || 0;
+      // Selvästi muita hiljaisempi päivä selitetään listan yläpuolella eikä vain alatunnisteessa.
+      $("daynote").hidden = !(n && n < busiest / 3);
+      $("daynote").textContent = "Tälle päivälle on julkaistu vasta " + plural(n, "näytös", "näytöstä") + ". Teatterit voivat lisätä näytöksiä myöhemmin.";
       for (const s of scr) {
         if (s.start.slice(0, 10) !== dayIso || (venue && s.cinema !== venue)) continue;
         const f = byId.get(s.film);
@@ -287,32 +290,61 @@ footer a { color: var(--fg); text-decoration-color: var(--accent); text-underlin
         ss.sort((a, b) => a.start.localeCompare(b.start));
         const by = new Map();
         for (const s of ss) { if (!by.has(s.cinema)) by.set(s.cinema, []); by.get(s.cinema).push(s); }
-        return { f: byId.get(id), first: ss[0].start, by: [...by] };
+        // Teatterit aina samassa järjestyksessä, jotta saman teatterin rivi löytyy joka kortista samasta kohdasta.
+        // Järjestysavain on seuraava vielä alkamaton näytös; jo alkaneille ensimmäinen.
+        return { f: byId.get(id), ss, first: (nextOf(ss) || ss[0]).start, by: [...by].sort((a, b) => vIdx(a[0]) - vIdx(b[0])) };
       }).sort((a, b) => a.first.localeCompare(b.first) || a.f.title.localeCompare(b.f.title, "fi"));
+    }
+    let sections = [["", "", cards]];
+    if (!noTimes && iso(sel) === todayIso) {
+      const soon = [], later = [], done = [];
+      for (const c of cards) {
+        const n = nextOf(c.ss);
+        (!n ? done : mins(n) - nowMin <= 120 ? soon : later).push(c);
+        // Kortissa, jossa on vielä tulevia näytöksiä, alkaneet jätetään pois; laskuri seuraa näkyviä.
+        if (n) { c.hidePast = true; nScr -= c.ss.filter(isPast).length; }
+      }
+      sections = [["Seuraavat 2 tuntia", "soon", soon], ["Myöhemmin tänään", "", later], ["Jo alkaneet", "", done]];
     }
     const total = noTimes ? plural(cards.length, "elokuva", "elokuvaa") : plural(cards.length, "elokuva", "elokuvaa") + " · " + plural(nScr, "näytös", "näytöstä");
     $("count").textContent = total;
     // Ruudunlukijalle tulos vasta kun kirjoittaminen taukoaa.
     clearTimeout(announce);
-    announce = setTimeout(() => { $("count-live").textContent = total; }, 400);
+    // Päivä mukaan, jotta päivän vaihto kuuluu muutoinkin kuin pelkkänä lukuna.
+    announce = setTimeout(() => { $("count-live").textContent = (noTimes ? "" : dayName(sel) + ": ") + total; }, 400);
 
     if (!cards.length) {
       const box = el("div", "empty");
-      box.append(el("p", null, filtered ? "Mikään elokuva ei vastaa suodattimia. Kokeile toista hakusanaa tai tyhjennä suodattimet." : "Tälle päivälle ei löytynyt näytöksiä."));
+      box.append(el("p", null, filtered ? "Mikään elokuva ei vastaa suodattimia. Kokeile toista hakusanaa tai tyhjennä suodattimet." : "Tälle päivälle ei ole vielä julkaistu näytöksiä."));
+      if (filtered) {
+        const b = el("button", "reset", "Tyhjennä suodattimet");
+        b.type = "button"; b.addEventListener("click", resetFilters);
+        box.append(b);
+      }
       list.append(box);
       return;
     }
-    cards.forEach(({ f, by }, i) => {
+    // Elokuvat ovat h3-otsikoita; muina päivinä ryhmäotsikon paikalla on ruudunlukijalle päivän nimi (h1 → h2 → h3).
+    if (sections.length === 1) list.append(el("h2", "sr-only", noTimes ? "Elokuvaluettelo" : "Näytökset " + dayName(sel)));
+    let i = 0;
+    for (const [label, cls, cs] of sections) {
+      if (!cs.length) continue;
+      if (label) list.append(el("h2", "group" + (cls ? " " + cls : ""), label));
+      for (const { f, by, hidePast } of cs) list.append(card(f, hidePast ? by.map(([v, ss]) => [v, ss.filter((s) => !isPast(s))]).filter(([, ss]) => ss.length) : by, i++));
+    }
+  }
+
+  function card(f, by, i) {
       const c = el("article", "card");
       c.setAttribute("aria-labelledby", "n" + i);
       const left = el("div");
-      if (isNew(f)) { const t = el("div", "tags"); t.append(el("span", "pill pian", "Uusi")); left.append(t); }
+      if (isNew(f)) { const t = el("div", "tags"); t.append(el("span", "pill new", newLabel(f))); left.append(t); }
       const name = el("h3", "name", f.title); name.id = "n" + i;
       left.append(name);
       const meta = [];
       if (f.runtime) meta.push(f.runtime + " min");
       if ((f.genres || []).length) meta.push(f.genres.join(", "));
-      if (f.age) meta.push("Ikäraja " + f.age);
+      meta.push(ageText(f.age));
       if (meta.length) left.append(el("div", "sub", meta.join(" · ")));
       if (f.original && f.original.trim().toLowerCase() !== f.title.trim().toLowerCase()) left.append(el("div", "sub", "Alkuperäinen nimi: " + f.original));
       for (const [cin, ss] of by) {
@@ -320,12 +352,12 @@ footer a { color: var(--fg); text-decoration-color: var(--accent); text-underlin
         row.append(el("span", "cname", cin));
         const ts = el("span", "times");
         for (const s of ss) {
-          const past = s.start.slice(0, 10) === todayIso && hhmm(s.start) < nowHM;
+          const past = isPast(s);
           const label = fi(s.start) + (s.auditorium ? ", " + s.auditorium : "") + ", " + cin + (past ? " (alkanut)" : "");
           const t = s.url ? el("a", "time", fi(s.start)) : el("span", "time", fi(s.start));
+          if (s.auditorium) t.append(el("span", "hall", s.auditorium));
           if (s.url) { t.href = s.url; t.target = "_blank"; t.rel = "noopener"; }
           if (past) t.classList.add("past");
-          t.title = [s.auditorium, past ? "alkanut" : ""].filter(Boolean).join(", ");
           // Linkillä aria-label korvaa tekstin, joten sen on sisällettävä kellonaika; span-elementille nimeä ei anneta.
           if (s.url || past) t.setAttribute("aria-label", label + (s.url ? " (avautuu uuteen välilehteen)" : ""));
           ts.append(t);
@@ -335,11 +367,12 @@ footer a { color: var(--fg); text-decoration-color: var(--accent); text-underlin
         left.append(row);
       }
       c.append(left);
-      list.append(c);
-    });
+      return c;
   }
 
   if (noTimes && warnings.length) { $("alert").textContent = warnings[0]; $("alert").hidden = false; }
+  // Vanha sivu ei saa näyttää menneen viikon aikoja ajankohtaisina.
+  else if (data.to && todayIso > data.to) { $("alert").textContent = "Nämä näytösajat koskevat jo mennyttä viikkoa (" + $("range").textContent + "). Hae uusi lista."; $("alert").hidden = false; }
 
   const f = $("footer");
   for (const w of warnings) f.append(el("p", null, w));
