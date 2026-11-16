@@ -55,6 +55,18 @@ class AsetuksetTest(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
         self.assertIn("Oulu", r.stderr)
 
+    def test_helsinki_supported(self):
+        real_cities = pathlib.Path(__file__).resolve().parent.parent / "cities"
+        config = tempfile.TemporaryDirectory()
+        self.addCleanup(config.cleanup)
+        env = dict(os.environ, XDG_CONFIG_HOME=config.name, NAYTTELYT_CITIES_DIR=str(real_cities))
+        r = subprocess.run(
+            [sys.executable, "-I", str(SCRIPT), "--kaupunki", "Helsinki"],
+            env=env, capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(json.loads(r.stdout)["kaupunki"], "Helsinki")
+
 
 if __name__ == "__main__":
     unittest.main()

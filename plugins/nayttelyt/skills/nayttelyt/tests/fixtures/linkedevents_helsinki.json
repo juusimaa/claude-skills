@@ -1,0 +1,399 @@
+[
+ {
+  "id": "helsinki:agq5jcagwm",
+  "name": {
+   "fi": "Eeva Juuti: Message",
+   "sv": "Eeva Juuti: Message",
+   "en": "Eeva Juuti: Message"
+  },
+  "start_time": "2026-11-21T10:00:00Z",
+  "end_time": "2026-12-20T14:00:00Z",
+  "info_url": {
+   "fi": "https://www.muu.fi/fi/muuspace/nayttelyt/eeva-juuti-message/",
+   "sv": "https://www.muu.fi/muuspace/exhibitons/eeva-juuti-message/",
+   "en": "https://www.muu.fi/muuspace/exhibitons/eeva-juuti-message/"
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": "",
+     "sv": "",
+     "en": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": null,
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "MUU Helsinki Nykytaidekeskus",
+    "sv": "MUU Helsinki Contemporary Art Centre",
+    "en": "MUU Helsinki Contemporary Art Centre"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agquakw62q",
+  "name": {
+   "fi": "Pia Männikkö: Kesäyön unelma"
+  },
+  "start_time": "2026-11-02T06:00:00Z",
+  "end_time": "2026-11-29T18:00:00Z",
+  "info_url": {
+   "fi": ""
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": null,
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "Keskustakirjasto Oodi",
+    "sv": "Helsingfors centrumbibliotek Ode",
+    "en": "Helsinki Central Library Oodi"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agq3anun6u",
+  "name": {
+   "fi": "Taidenäyttely: Arttu Moser"
+  },
+  "start_time": "2026-11-01T22:00:00Z",
+  "end_time": "2026-11-29T22:00:00Z",
+  "info_url": {
+   "fi": ""
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": null,
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "Kallion kirjasto",
+    "sv": "Berghälls bibliotek",
+    "en": "Kallio Library"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agqyo6ekra",
+  "name": {
+   "fi": "Taidetyöpajojen aarteita -näyttely Rautavaarassa"
+  },
+  "start_time": "2026-11-03T08:00:00Z",
+  "end_time": "2026-12-18T15:30:00Z",
+  "info_url": {
+   "fi": "https://www.hel.fi/fi/paatoksenteko-ja-hallinto/stadin-yhteisotalo-oulunkylan-seurahuone"
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": null,
+  "super_event_type": "recurring",
+  "location": {
+   "name": {
+    "fi": "Stadin yhteisötalo Oulunkylän Seurahuone",
+    "sv": "Gemenskapshuset Åggelby Societetshus",
+    "en": "Community house Oulunkylän Seurahuone"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agqyo6dtuu",
+  "name": {
+   "fi": "Taidetyöpajojen aarteita -näyttely Rautavaarassa"
+  },
+  "start_time": "2026-11-20T08:00:00Z",
+  "end_time": "2026-11-20T15:30:00Z",
+  "info_url": {
+   "fi": "https://www.hel.fi/fi/paatoksenteko-ja-hallinto/stadin-yhteisotalo-oulunkylan-seurahuone"
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": {
+   "@id": "https://api.hel.fi/linkedevents/v1/event/helsinki:agqyo6ekra/"
+  },
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "Stadin yhteisötalo Oulunkylän Seurahuone",
+    "sv": "Gemenskapshuset Åggelby Societetshus",
+    "en": "Community house Oulunkylän Seurahuone"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agq2yyzuwq",
+  "name": {
+   "fi": "Mari Paikkari: Before Us",
+   "sv": "Mari Paikkari: Before Us",
+   "en": "Mari Paikkari: Before Us"
+  },
+  "start_time": "2026-11-13T10:00:00Z",
+  "end_time": "2026-12-22T16:00:00Z",
+  "info_url": {
+   "fi": "https://www.gaoshanhelsinki.com/",
+   "sv": "https://www.gaoshanhelsinki.com/",
+   "en": "https://www.gaoshanhelsinki.com/"
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": "",
+     "sv": "",
+     "en": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": null,
+  "super_event_type": "recurring",
+  "location": {
+   "name": {
+    "fi": "Galleria GAo ShAn",
+    "sv": "Galleria GAo ShAn",
+    "en": "Gallery GAo ShAn"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agq2yyym7q",
+  "name": {
+   "fi": "Mari Paikkari: Before Us",
+   "sv": "Mari Paikkari: Before Us",
+   "en": "Mari Paikkari: Before Us"
+  },
+  "start_time": "2026-11-17T10:00:00Z",
+  "end_time": "2026-11-17T16:00:00Z",
+  "info_url": {
+   "fi": "https://www.gaoshanhelsinki.com/",
+   "sv": "https://www.gaoshanhelsinki.com/",
+   "en": "https://www.gaoshanhelsinki.com/"
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": "",
+     "sv": "",
+     "en": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": {
+   "@id": "https://api.hel.fi/linkedevents/v1/event/helsinki:agq2yyzuwq/"
+  },
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "Galleria GAo ShAn",
+    "sv": "Galleria GAo ShAn",
+    "en": "Gallery GAo ShAn"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agq2yyynxm",
+  "name": {
+   "fi": "Mari Paikkari: Before Us",
+   "sv": "Mari Paikkari: Before Us",
+   "en": "Mari Paikkari: Before Us"
+  },
+  "start_time": "2026-11-18T10:00:00Z",
+  "end_time": "2026-11-18T16:00:00Z",
+  "info_url": {
+   "fi": "https://www.gaoshanhelsinki.com/",
+   "sv": "https://www.gaoshanhelsinki.com/",
+   "en": "https://www.gaoshanhelsinki.com/"
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": "",
+     "sv": "",
+     "en": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": {
+   "@id": "https://api.hel.fi/linkedevents/v1/event/helsinki:agq2yyzuwq/"
+  },
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "Galleria GAo ShAn",
+    "sv": "Galleria GAo ShAn",
+    "en": "Gallery GAo ShAn"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agqefvem5m",
+  "name": {
+   "fi": "Lastentarhamuseon avoimet ovet",
+   "sv": "Öppet hus på barnträdgårdsmuseet",
+   "en": "Open day at the Kindergarten Museum"
+  },
+  "start_time": "2026-11-18T10:00:00Z",
+  "end_time": "2026-11-18T17:00:00Z",
+  "info_url": {
+   "fi": "",
+   "sv": "",
+   "en": ""
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": "",
+     "sv": "",
+     "en": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": null,
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "Lastentarhamuseo",
+    "sv": "Barnträdgårdsmuseet",
+    "en": "Kindergarten Museum"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agqt5hcubm",
+  "name": {
+   "fi": "Emma Talbot: Et ole keskipiste",
+   "sv": "Emma Talbot: Du är inte medelpunkten",
+   "en": "Emma Talbot: You Are Not the Centre"
+  },
+  "start_time": "2026-10-09T08:00:00Z",
+  "end_time": "2027-04-25T14:00:00Z",
+  "info_url": {
+   "fi": "https://www.hamhelsinki.fi/exhibitions/emma-talbot/",
+   "sv": "https://www.hamhelsinki.fi/sv/exhibitions/emma-talbot/",
+   "en": "https://www.hamhelsinki.fi/en/exhibitions/emma-talbot/"
+  },
+  "offers": [
+   {
+    "is_free": false,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": "",
+     "sv": "",
+     "en": ""
+    },
+    "description": {
+     "fi": "",
+     "sv": "",
+     "en": ""
+    },
+    "price": {
+     "fi": "20/12/0",
+     "sv": "20/12/0",
+     "en": "20/12/0"
+    }
+   }
+  ],
+  "super_event": null,
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "Helsingin taidemuseo HAM",
+    "sv": "Helsingfors konstmuseum HAM",
+    "en": "Helsinki Art Museum HAM"
+   }
+  }
+ },
+ {
+  "id": "helsinki:agqyn73tda",
+  "name": {
+   "fi": "Lassi Kontiainen: Avoin sija",
+   "sv": "Lassi Kontiainen",
+   "en": "Lassi Kontiainen"
+  },
+  "start_time": "2026-10-23T08:00:00Z",
+  "end_time": "2026-11-22T14:00:00Z",
+  "info_url": {
+   "fi": "https://galerieforsblom.com",
+   "sv": "https://galerieforsblom.com",
+   "en": "https://galerieforsblom.com"
+  },
+  "offers": [
+   {
+    "is_free": true,
+    "offer_price_groups": [],
+    "info_url": {
+     "fi": "",
+     "sv": "",
+     "en": ""
+    },
+    "description": null,
+    "price": null
+   }
+  ],
+  "super_event": null,
+  "super_event_type": null,
+  "location": {
+   "name": {
+    "fi": "Galerie Forsblom",
+    "sv": "Galerie Forsblom",
+    "en": "Galerie Forsblom"
+   }
+  }
+ }
+]

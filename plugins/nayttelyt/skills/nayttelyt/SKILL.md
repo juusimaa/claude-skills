@@ -1,6 +1,6 @@
 ---
 name: nayttelyt
-description: Hakee valitun suomalaisen kaupungin näyttelyt (taide, valokuva, muotoilu, museot; määräaikaiset ja pysyvät), jotka ovat auki tällä viikolla tai valitulla aikavälillä, ja listaa ne taulukkona aukioloaikojen ja hintojen kanssa. Merkitsee näyttelyt tunnisteilla Uusi, Päättyy pian ja Pysyvä ja tekee samasta listasta web-sivun. Tuettu tällä hetkellä: Oulu (muut keikat-skillin 17 kaupungista tulossa). Ei elokuvia eikä live-musiikkia. Käytä kun käyttäjä kysyy "mitä näyttelyitä Oulussa", "näyttelyt tällä viikolla", "mitä näyttelyitä on joulukuussa" tai kutsuu /nayttelyt.
+description: Hakee valitun suomalaisen kaupungin näyttelyt (taide, valokuva, muotoilu, museot; määräaikaiset ja pysyvät), jotka ovat auki tällä viikolla tai valitulla aikavälillä, ja listaa ne taulukkona aukioloaikojen ja hintojen kanssa. Merkitsee näyttelyt tunnisteilla Uusi, Päättyy pian ja Pysyvä ja tekee samasta listasta web-sivun. Tuettu tällä hetkellä: Oulu ja Helsinki (muut keikat-skillin kaupungit tulossa). Ei elokuvia eikä live-musiikkia. Käytä kun käyttäjä kysyy "mitä näyttelyitä Oulussa", "mitä näyttelyitä Helsingissä", "näyttelyt tällä viikolla", "mitä näyttelyitä on joulukuussa" tai kutsuu /nayttelyt.
 argument-hint: "[kaupunki] [viikko|1kk–12kk] | asetukset [kaupunki] [viikko|1kk–12kk]"
 ---
 
@@ -35,7 +35,7 @@ Aja ensin `asetukset.py` ilman valintoja ja käytä sen tulostamaa `kaupunki` ja
 
 Komennon argumentti on: `$ARGUMENTS`. Siinä voi olla kaupunki, aikaväli tai molemmat missä järjestyksessä tahansa (esim. `Oulu 3kk`, `joulukuussa`, `Oulussa`). Argumentin arvot ohittavat tallennetut oletukset vain tällä kertaa. Poimi parametrit myös vapaasta pyynnöstä, muuten käytä oletuksia:
 
-- **Kaupunki**: oletus asetuksista (tehdasasetus Oulu). Tunnista nimi myös taivutettuna ja pienellä kirjoitettuna ("oulussa"). Tällä hetkellä tuettu on vain Oulu. Muista keikat-skillin 16 kaupungista (Helsinki, Espoo, Vantaa, Tampere, Turku, Jyväskylä, Kuopio, Lahti, Pori, Kouvola, Joensuu, Lappeenranta, Hämeenlinna, Vaasa, Seinäjoki, Rovaniemi) sano yhdellä lauseella "ei vielä tuettu", kerro että tuettu on vain Oulu, ja lopeta. Sama pätee tuntemattomaan kaupunkiin. Älä hae oletuskaupungin näyttelyitä tilalle.
+- **Kaupunki**: oletus asetuksista (tehdasasetus Oulu). Tunnista nimi myös taivutettuna ja pienellä kirjoitettuna ("oulussa"). Tällä hetkellä tuetut ovat Oulu ja Helsinki. Muista keikat-skillin 15 kaupungista (Espoo, Vantaa, Tampere, Turku, Jyväskylä, Kuopio, Lahti, Pori, Kouvola, Joensuu, Lappeenranta, Hämeenlinna, Vaasa, Seinäjoki, Rovaniemi) sano yhdellä lauseella "ei vielä tuettu", kerro että tuetut ovat Oulu ja Helsinki, ja lopeta. Sama pätee tuntemattomaan kaupunkiin. Älä hae oletuskaupungin näyttelyitä tilalle.
 - **Aikaväli**: oletus asetuksista (tehdasasetus viikko). Muunna se päivämääriksi `--from` ja `--to` (muoto `YYYY-MM-DD`). Tämä päivä on `generated`.
   - Oletus / `viikko` / "tällä viikolla": `--from` tänään, `--to` tämän viikon sunnuntai. Sivun `range` näyttää silti koko viikon ma–su, esim. `16.–22.11.2026`.
   - `Nkk` (myös `N kk`, `N kuukautta`, pelkkä luku `N`), N 1–12: `--from` tänään, `--to` tänään + N kuukautta. Jos N on yli 12, käytä 12 ja kerro siitä yhdellä lauseella.
@@ -46,8 +46,9 @@ Komennon argumentti on: `$ARGUMENTS`. Siinä voi olla kaupunki, aikaväli tai mo
 | Kaupunki | Otsikossa | Kaupungin tiedosto |
 |---|---|---|
 | Oulu | Oulussa | [cities/oulu.md](cities/oulu.md) |
+| Helsinki | Helsingissä | [cities/helsinki.md](cities/helsinki.md) |
 
-Muut keikat-skillin 17 kaupungista tulevat myöhemmin. Lue valitun kaupungin tiedosto ennen vaihetta 2. Siinä ovat kaupungin skriptit, lähteet (merkitty **skripti** tai **haku**), pysyvät näyttelyt aukioloaikoineen ja hintoineen sekä sudenkuopat.
+Muut keikat-skillin kaupungit tulevat myöhemmin. Lue valitun kaupungin tiedosto ennen vaihetta 2. Siinä ovat kaupungin skriptit, lähteet (merkitty **skripti** tai **haku**), pysyvät näyttelyt aukioloaikoineen ja hintoineen sekä sudenkuopat.
 
 ## Vaiheet
 
@@ -60,10 +61,12 @@ Aja `asetukset.py` ja päätä kaupunki ja aikaväli (ks. Parametrit).
 ### 2. Skriptit (luotettavimmat)
 
 ```bash
-python3 -I <tämän skillin kansio>/scripts/nayttelyt_oulu.py --from YYYY-MM-DD --to YYYY-MM-DD
+python3 -I <tämän skillin kansio>/scripts/nayttelyt_<kaupunki>.py --from YYYY-MM-DD --to YYYY-MM-DD
 ```
 
-Tuloste on JSON-lista näyttelyistä. Valinnat: `--from`, `--to` ja `--table` (tekstitaulukko JSONin sijaan). Skripti lukee tapahtumapalvelun, Oulun taidemuseon ja Valven näyttelyt sekä kaupungin pysyvät rivit. Jos skripti kertoo stderrissä, että lähde epäonnistui tai palautti nollan riviä, mainitse se lopuksi ja täydennä vaiheessa 3.
+Skriptin tarkka nimi on kaupungin tiedoston `## Skriptit`-osiossa (esim. `nayttelyt_oulu.py`, `nayttelyt_helsinki.py`).
+
+Tuloste on JSON-lista näyttelyistä. Valinnat: `--from`, `--to` ja `--table` (tekstitaulukko JSONin sijaan). Kaupungin tiedosto kertoo, mitä lähteitä skripti lukee. Jos skripti kertoo stderrissä, että lähde epäonnistui tai palautti nollan riviä, mainitse se lopuksi ja täydennä vaiheessa 3.
 
 ### 3. Täydennä haulla
 
