@@ -9,6 +9,7 @@ My own plugins and skills for [Claude Code](https://claude.com/claude-code): a c
 | [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: the session model plans a task, and Haiku and Sonnet workers implement the subtasks in parallel. | Apache-2.0 |
 | [keikat](plugins/keikat/skills/keikat/SKILL.md) | `/keikat`: music gigs in Finland's 17 largest cities, as one list with prices and ticket status, in the terminal and as a filterable web page. | Apache-2.0 |
 | [nayttelyt](plugins/nayttelyt/skills/nayttelyt/SKILL.md) | `/nayttelyt`: exhibitions (art, photography, design, museums) open in a city this week or a chosen period, with hours, prices and tags, in the terminal and as a web page. Oulu for now. | Apache-2.0 |
+| [elokuvat](plugins/elokuvat/skills/elokuvat/SKILL.md) | `/elokuvat`: cinema showtimes (Finnkino and independent cinemas) in a Finnish city tonight, tomorrow or this week, with booking links, in the terminal and as a filterable web page. | Apache-2.0 |
 
 ## Installation
 
@@ -19,6 +20,7 @@ Add the marketplace and install the plugins you want:
 /plugin install orchestrate@claude-skills
 /plugin install keikat@claude-skills
 /plugin install nayttelyt@claude-skills
+/plugin install elokuvat@claude-skills
 ```
 
 Then run `/reload-plugins`.
@@ -146,6 +148,49 @@ python3 plugins/nayttelyt/skills/nayttelyt/scripts/asetukset.py --kaupunki Oulu 
 
 `asetukset.py` shows and saves the defaults (`--kaupunki`, `--aikavali`, `--nollaa`). `sivu.py` builds the web page from a JSON file.
 
+## elokuvat
+
+The command's arguments are in Finnish (`tänään` is today, `huomenna` tomorrow, `viikko` the week).
+
+```
+/elokuvat                  # default city and window (factory default Oulu, tonight)
+/elokuvat Helsinki viikko  # one row per film, today to Sunday
+/elokuvat huomenna
+/elokuvat jyväskylässä
+
+/elokuvat asetukset Tampere viikko   # save defaults for plain /elokuvat
+/elokuvat asetukset                  # show the current defaults
+/elokuvat asetukset nollaa           # back to the factory defaults
+```
+
+Defaults are saved in `~/.config/elokuvat/asetukset.json` (or `$XDG_CONFIG_HOME/elokuvat/`). Any city that elokuviin.com has a page for works (about 160, including all of keikat's cities).
+
+"Tonight" lists today's screenings that have not started yet, by time, with cinema, auditorium, running time, age rating and a booking link. "This week" has one row per film with its showtimes by cinema and day. Films that premiered in the last 7 days or premiere this week are tagged **Uusi** (new). The web page always holds the whole week, with day buttons and filters. Prices and seat availability are not available.
+
+Sources:
+
+| Source | What | How |
+|---|---|---|
+| [elokuviin.com](https://elokuviin.com) | showtimes for Finnkino and other cinemas | script (`elokuvat.py`), reads the public city page |
+| [nytleffaan.fi](https://nytleffaan.fi) | Finnish premiere dates and age ratings | script (`elokuvat.py`) |
+
+Finnkino's own XML feed answers scripts with a bot check, so it is not used.
+
+### Installation without the marketplace
+
+```bash
+ln -s "$PWD/claude-skills/plugins/elokuvat/skills/elokuvat" ~/.claude/skills/elokuvat
+```
+
+The scripts need only the Python 3 standard library (3.9+ for `zoneinfo`). You can also run them directly:
+
+```bash
+python3 plugins/elokuvat/skills/elokuvat/scripts/elokuvat.py --city Oulu > oulu.json
+python3 plugins/elokuvat/skills/elokuvat/scripts/sivu.py oulu.json oulu.html --tanaan
+```
+
+`asetukset.py` shows and saves the defaults (`--kaupunki`, `--aikavali`, `--nollaa`).
+
 ## Structure
 
 ```
@@ -162,11 +207,17 @@ plugins/
 │       ├── cities/                 # per-city sources
 │       ├── scripts/                # data fetching and page building
 │       └── templates/              # web page template
-└── nayttelyt/
+├── nayttelyt/
+│   ├── .claude-plugin/plugin.json
+│   └── skills/nayttelyt/
+│       ├── SKILL.md                # instructions for Claude
+│       ├── cities/                 # per-city sources
+│       ├── scripts/                # data fetching and page building
+│       └── templates/              # web page template
+└── elokuvat/
     ├── .claude-plugin/plugin.json
-    └── skills/nayttelyt/
+    └── skills/elokuvat/
         ├── SKILL.md                # instructions for Claude
-        ├── cities/                 # per-city sources
         ├── scripts/                # data fetching and page building
         └── templates/              # web page template
 ```
