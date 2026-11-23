@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1 – 2026-11-23
+
+- The progress report is now a required part of steps 4 and 5 whenever savvy-progress is installed. Orchestrators were skipping the optional section at the end, so the progress bar above the prompt never appeared.
+
 ## 1.1.0 – 2026-11-23
 
 - New `--worktree` option: `/orchestrate --worktree <task>` runs each worker in its own git worktree, so parallel test runs and builds can't collide. The orchestrator commits shared groundwork first and applies each worker's changes to your folder after reviewing them. It needs `worktree.baseRef` set to `"head"` and asks to add it to the project's `.claude/settings.local.json` if missing; your folder must otherwise be clean.
