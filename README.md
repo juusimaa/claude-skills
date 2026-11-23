@@ -6,7 +6,7 @@ My own plugins and skills for [Claude Code](https://claude.com/claude-code): a c
 
 | Plugin | Description | Version | License |
 |---|---|---|---|
-| [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: the session model plans a task, and Haiku and Sonnet workers implement the subtasks in parallel. | [1.0.0](plugins/orchestrate/CHANGELOG.md) | Apache-2.0 |
+| [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: the session model plans a task, and Haiku and Sonnet workers implement the subtasks in parallel. | [1.1.0](plugins/orchestrate/CHANGELOG.md) | Apache-2.0 |
 | [keikat](plugins/keikat/skills/keikat/SKILL.md) | `/keikat`: music gigs in Finland's 17 largest cities, as one list with prices and ticket status, in the terminal and as a filterable web page. | [1.0.0](plugins/keikat/CHANGELOG.md) | Apache-2.0 |
 | [nayttelyt](plugins/nayttelyt/skills/nayttelyt/SKILL.md) | `/nayttelyt`: exhibitions (art, photography, design, museums) open in a city this week or a chosen period, with hours, prices and tags, in the terminal and as a web page. Oulu and Helsinki for now. | [1.1.0](plugins/nayttelyt/CHANGELOG.md) | Apache-2.0 |
 | [elokuvat](plugins/elokuvat/skills/elokuvat/SKILL.md) | `/elokuvat`: cinema showtimes (Finnkino and independent cinemas) in a Finnish city tonight, tomorrow or this week, with booking links, in the terminal and as a filterable web page. | [1.0.0](plugins/elokuvat/CHANGELOG.md) | Apache-2.0 |
@@ -31,7 +31,7 @@ Then run `/reload-plugins`.
 /orchestrate add a notifications toggle to the settings screen and write tests for it
 ```
 
-The orchestrator (the session model) reads the code, shows a plan as a table (subtask, worker, files) and waits for your approval. Independent subtasks then run in parallel, and the orchestrator reviews the results, runs the tests and summarizes. Workers never commit or push. If a worker fails, it is re-briefed once, and after that the orchestrator does the subtask itself.
+The orchestrator (the session model) reads the code, shows a plan as a table (subtask, worker, files) and waits for your approval. Independent subtasks then run in parallel, and the orchestrator reviews the results, runs the tests and summarizes. Each worker runs in its own git worktree, and its changes reach your folder only after the orchestrator has reviewed them. Shared groundwork is committed first so workers can see it, and your folder must otherwise have no uncommitted changes (the orchestrator asks if it does). Workers never commit or push. If a worker fails, it is re-briefed once, and after that the orchestrator does the subtask itself.
 
 The workers are `haiku-worker` (Haiku, low effort: mechanical changes) and `sonnet-worker` (Sonnet, medium effort: well-scoped tasks that need some judgment). When installed with the plugin they are listed as `orchestrate:haiku-worker` and `orchestrate:sonnet-worker`. If you have your own workers with the same names, the plugin's workers are preferred.
 
