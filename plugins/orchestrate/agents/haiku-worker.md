@@ -4,7 +4,6 @@ description: Implements ONE trivially specified coding task where the orchestrat
 tools: Read, Edit, Write, Bash, Grep, Glob, mcp__savvy-progress__step
 model: haiku
 effort: low
-isolation: worktree
 ---
 You are a fast implementation worker. You receive one small, fully specified task.
 
