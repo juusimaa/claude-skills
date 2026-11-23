@@ -11,23 +11,33 @@ Worker names: the workers are `haiku-worker` and `sonnet-worker`. When they ship
 1. Plan
    - Explore the relevant code and write a short plan.
    - Split the work into small, independent subtasks with NON-OVERLAPPING file boundaries.
-   - Do shared groundwork yourself first (shared types, interfaces, config) so subtasks don't depend on each other.
+   - Do shared groundwork yourself first (shared types, interfaces, config) so subtasks don't depend on each other. Workers run in their own git worktrees, which start from the last commit, so the groundwork gets committed before workers launch (step 4).
 
 2. Route each subtask
    - haiku-worker: mechanical and fully specified - you can say exactly what to change.
    - sonnet-worker: needs some judgment, but is well-scoped.
    - Yourself: architecture, cross-cutting changes, tricky logic, anything security-sensitive.
 
-3. Show me the plan as a table (subtask, worker, files) and wait for my OK before launching workers.
+3. Show me the plan as a table (subtask, worker, files) and wait for my OK before launching workers. If there is groundwork, add one line under the table naming the files you will commit as groundwork; my OK covers that commit.
 
 4. Delegate
-   - Launch all independent subtasks in parallel in a single step.
+   - Isolation: if `git rev-parse HEAD` fails (not a git repo, or no commits yet), skip the next three bullets, launch workers without `isolation` in this folder, and tell me they share it.
+   - Groundwork commit: stage only the groundwork files by path and commit them as `orchestrate: groundwork for <task>`. No groundwork, no commit.
+   - Clean check: if `git status --porcelain` then shows anything, stop and ask me whether to commit it, stash it, or run without isolation. Never stash or discard my changes yourself.
+   - Launch all independent subtasks in parallel in a single step, each with the Agent tool's `isolation: "worktree"`. Tell each worker it works in its own checkout of the repo.
+   - When the first worker reports back, check that its worktree contains the groundwork: `git -C <worktree> merge-base --is-ancestor <groundwork sha> HEAD`. If it doesn't, tell me, and redo the subtasks that depend on the groundwork without isolation, one at a time.
    - Give each worker a self-contained brief: goal, exact files, interfaces to respect, how to verify. Workers do not see this conversation.
    - Tell every worker not to commit, push or change git state; you decide that.
    - Pass each subtask's `title` verbatim as the Agent tool's `description` (a re-delegation reuses it too): the agents panel matches runs to planned tasks by it.
 
 5. Integrate
-   - Review each worker's changes. Fix or re-delegate anything wrong.
+   - Bring in each worker's changes one at a time. A worker that changed nothing has no worktree left; skip it. For the others, using the worktree path and branch the Agent result reports:
+     ```bash
+     git -C <worktree> add -A   # includes new files; this only stages, inside the worker's checkout
+     git -C <worktree> diff --cached --binary > <scratch dir>/worker-<n>.patch
+     ```
+     Review the patch. If it is right, `git apply <scratch dir>/worker-<n>.patch` in this folder; if `git apply` fails, fix it by hand or re-delegate, never overwrite. Then `git worktree remove --force <worktree>` and `git branch -D <its branch>`.
+   - Fix or re-delegate anything wrong. A re-delegated worker gets a fresh worktree.
    - If a worker fails or reports a blocker or an open question: answer it and re-brief that worker once. If it still fails, do the subtask yourself and say so in the summary.
    - Run the full test suite / build and fix failures.
    - Summarize what was done and by whom.
