@@ -6,12 +6,12 @@ Act as the orchestrator for this task: $ARGUMENTS
 
 You think, plan, decide and review. Workers execute small, well-scoped pieces. You run on whatever model this session uses.
 
-Worker names: the workers are `haiku-worker` and `sonnet-worker`. When they ship with the orchestrate plugin the Agent tool lists them as `orchestrate:haiku-worker` and `orchestrate:sonnet-worker`; use the listed name that ends in the worker name, and prefer the `orchestrate:` one if both exist. If neither worker is listed, stop and tell me.
+Worker names (hard rule): launch workers ONLY as `orchestrate:haiku-worker` and `orchestrate:sonnet-worker`, never as plain `haiku-worker` or `sonnet-worker`, even if those are listed too: they may be other agents without worktree isolation. If the `orchestrate:` workers are not listed, stop and tell me. Below, "haiku-worker" and "sonnet-worker" mean the `orchestrate:` ones.
 
 1. Plan
    - Explore the relevant code and write a short plan.
    - Split the work into small, independent subtasks with NON-OVERLAPPING file boundaries.
-   - Do shared groundwork yourself first (shared types, interfaces, config) so subtasks don't depend on each other. Workers run in their own git worktrees, which start from the last commit, so the groundwork gets committed before workers launch (step 4).
+   - Do shared groundwork yourself first (shared types, interfaces, config) so subtasks don't depend on each other. Workers run in their own git worktrees, which start from the last commit, so the groundwork gets committed before workers launch (step 4, item 3).
 
 2. Route each subtask
    - haiku-worker: mechanical and fully specified - you can say exactly what to change.
@@ -21,11 +21,14 @@ Worker names: the workers are `haiku-worker` and `sonnet-worker`. When they ship
 3. Show me the plan as a table (subtask, worker, files) and wait for my OK before launching workers. If there is groundwork, add one line under the table naming the files you will commit as groundwork; my OK covers that commit.
 
 4. Delegate
-   - Isolation: if `git rev-parse HEAD` fails (not a git repo, or no commits yet), skip the groundwork commit, clean check and base check below, launch workers without `isolation` in this folder, and tell me they share it.
-   - Groundwork commit: stage only the groundwork files by path and commit them as `orchestrate: groundwork for <task>`. No groundwork, no commit. Either way, note `BASE=$(git rev-parse HEAD)`.
-   - Clean check: if `git status --porcelain` then shows anything, stop and ask me whether to commit it, stash it, or run without isolation. Never stash or discard my changes yourself.
-   - Launch all independent subtasks in parallel in a single step, each with the Agent tool's `isolation: "worktree"`. Tell each worker it works in its own checkout of the repo.
-   - Base check: for every worker that comes back with a worktree, before using its changes, run `git -C <worktree> merge-base --is-ancestor $BASE HEAD`. If it fails, that worktree did not start from BASE: discard its changes (never apply them), remove the worktree, tell me, and redo that subtask without isolation in this folder, one subtask at a time.
+   The workers' definitions put each one in its own git worktree. Before launching any worker, go through this checklist in order and say in one line per item what you found:
+   1. Git: if `git rev-parse HEAD` fails (not a git repo, or no commits yet), workers run in this folder and share it. Tell me, skip items 2-4, and go on.
+   2. Start point: worktrees start from `origin/<default branch>` unless the setting `worktree.baseRef` is `"head"`. Read it from `.claude/settings.local.json`, then `.claude/settings.json`, then `~/.claude/settings.json`; the first file that sets it wins. If none sets it to `"head"`, ask me for permission to add `"worktree": {"baseRef": "head"}` to this project's `.claude/settings.local.json` (merge into the existing JSON, keep everything else, and make sure the file is gitignored). If I say no, do not launch workers: do the subtasks yourself in this folder, one at a time.
+   3. Groundwork commit: stage only the groundwork files by path and commit them as `orchestrate: groundwork for <task>`. No groundwork, no commit. Either way, note `BASE=$(git rev-parse HEAD)`.
+   4. Clean check: if `git status --porcelain` then shows anything, stop and ask me whether to commit or stash it, or whether you should do the subtasks yourself instead. Never stash or discard my changes yourself.
+   5. Briefs: every file path in every brief is relative to the repo root; none contains this folder's absolute path.
+   - Launch all independent subtasks in parallel in a single step, each also with the Agent tool's `isolation: "worktree"`. Tell each worker it works in its own checkout of the repo.
+   - Base check: for every worker that comes back with a worktree, before using its changes, run `git -C <worktree> merge-base --is-ancestor $BASE HEAD`. If it fails, that worktree did not start from BASE: discard its changes (never apply them), remove the worktree, and do that subtask yourself in this folder. If it fails right after you added the setting in item 2, tell me the session probably needs a restart to pick the setting up.
    - Give each worker a self-contained brief: goal, exact files, interfaces to respect, how to verify. Workers do not see this conversation. Give file paths relative to the repo root, never this folder's absolute path, or the worker edits this folder instead of its own checkout. Its checkout has no gitignored files (dependencies, `.env`, build caches): tell it to install what the checks need, or to report that it could not run them.
    - Tell every worker not to commit, push or change git state; you decide that.
    - Pass each subtask's `title` verbatim as the Agent tool's `description` (a re-delegation reuses it too): the agents panel matches runs to planned tasks by it.

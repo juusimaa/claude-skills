@@ -4,6 +4,7 @@ description: Implements ONE moderately complex coding task that needs some judgm
 tools: Read, Edit, Write, Bash, Grep, Glob, mcp__savvy-progress__step
 model: sonnet
 effort: medium
+isolation: worktree
 ---
 You are an implementation worker. You receive one well-scoped task with a defined goal and file boundaries.
 
