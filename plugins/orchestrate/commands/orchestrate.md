@@ -56,8 +56,8 @@ Worker names (hard rule): launch workers ONLY as `orchestrate:haiku-worker` and 
 
 Progress bar (optional, needs the savvy-progress plugin)
 If the tool `mcp__savvy-progress__progress` appears among your tools, including as a deferred tool, it is available: a deferred tool only needs loading first with ToolSearch (`select:mcp__savvy-progress__progress`). If the tool is absent or ToolSearch does not find it, skip every progress call silently; the rest of this command works without it. Call it:
-- right after I approve the plan: `title` (a few words), `total` (number of worker subtasks, not counting work you do yourself), `tasks` (`[{ title, tier, after }]` in plan order; `after` is the numbers of the tasks it waits for), `phase: "delegate"`;
+- right after I approve the plan: `title` (a few words), `total` (number of worker subtasks, not counting work you do yourself), `tasks` (`[{ title, tier, model, effort, after }]` in plan order; `after` is the numbers of the tasks it waits for), `phase: "delegate"`;
 - each time a subtask is accepted in review: `done` (accepted so far), with `phase: "review"` while reviewing and back to `"delegate"` when launching more;
 - if re-planning changes the subtasks: the new `tasks` and `total`;
 - once at the end: `finished: true`.
-The tool only accepts savvy-flow's tier names, so label haiku-worker tasks `light` and sonnet-worker tasks `medium`. This label is cosmetic: it names a planned row in the panel before the worker starts, and does not change which worker runs. Workers report their own steps with `mcp__savvy-progress__step`; they need no extra instruction.
+The tool only accepts savvy-flow's tier names, so give haiku-worker tasks `tier: "light", model: "Haiku", effort: "low"` and sonnet-worker tasks `tier: "medium", model: "Sonnet", effort: "medium"`. The tier only picks the row's color; `model` and `effort` are what the panel shows before the worker starts. None of these change which worker runs. Workers report their own steps with `mcp__savvy-progress__step`; they need no extra instruction.
