@@ -22,6 +22,8 @@ Cost is a rough estimate from token counts and a built-in per-model price table 
 { "pluginConfigs": { "savvy-progress": { "options": { "language": "ru" } } } }
 ```
 
+`background`: `dots` (default) or `none`. `none` removes the dotted grid behind the desktop agents panel.
+
 `autoOpen`: `savvy` (default) or `any`. With `savvy` the panel opens by itself when a `savvy-*` worker starts or a plan is reported. With `any` it also opens, once per session, when any other subagent starts. `/agents-info` toggles it either way.
 
 Install instructions are in the [repository README](../../README.md#savvy-progress).

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0
+
+- New `background` setting: `dots` (default) keeps the dotted grid behind the desktop agents panel, `none` draws a plain background.
+
 ## 1.3.0
 
 - Forked from [johnnyvizz/claude-kit](https://github.com/johnnyvizz/claude-kit) savvy-progress 1.2.1.

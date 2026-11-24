@@ -503,10 +503,11 @@ const LINE_H = 24
 // tiles of at most this height; a multiple of GRID_STEP keeps the dots aligned.
 const GRID_TILE = 4096
 const gridTiles = (H: number) => Array.from({ length: Math.ceil(H / GRID_TILE) }, (_, i) => Math.min(GRID_TILE, H - i * GRID_TILE))
-const gridSvg = (W: number, H: number) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+// With `dots` off the SVG still sizes the pane, it just draws nothing.
+const gridSvg = (W: number, H: number, dots = true) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <style>.d{fill:#d9d8d4}@media (prefers-color-scheme: dark){.d{fill:#3a3a38}}</style>
 <defs><pattern id="g" width="${GRID_STEP}" height="${GRID_STEP}" patternUnits="userSpaceOnUse"><circle class="d" cx="${GRID_STEP / 2}" cy="${GRID_STEP / 2}" r="1"/></pattern></defs>
-<rect width="${W}" height="${H}" fill="url(#g)"/>
+<rect width="${W}" height="${H}" fill="${dots ? 'url(#g)' : 'none'}"/>
 </svg>`
 
 const PANE_CSS = `<style>
@@ -1098,7 +1099,7 @@ export const register: Register = (on, options) => {
           {/* The grid sizes the pane; the content is placed over it, as an
               absolute Box paints over the siblings before it. */}
           {gridTiles(gridH).map((tileH, i) => (
-            <Svg key={`grid-${i}`} source={gridSvg(W, tileH)} alt="dotted grid" width={W} height={tileH} />
+            <Svg key={`grid-${i}`} source={gridSvg(W, tileH, options.background !== 'none')} alt="dotted grid" width={W} height={tileH} />
           ))}
           <Box flexDirection="column" position="absolute" top={0} left={0} right={0} alignItems={align}>
             <Svg source={headerSvg(W, title, t)} alt={title ? `${title}: ${summary}` : summary} width={W} height={headerHeight(title)} />
