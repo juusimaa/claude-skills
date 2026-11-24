@@ -7,7 +7,7 @@ My own plugins and skills for [Claude Code](https://claude.com/claude-code): a c
 | Plugin | Description | Version | License |
 |---|---|---|---|
 | [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: the session model plans a task, and Haiku and Sonnet workers implement the subtasks in parallel. | [1.1.2](plugins/orchestrate/CHANGELOG.md) | MIT |
-| [savvy-progress](plugins/savvy-progress/README.md) | Progress bar above the prompt and a live agents panel for `/orchestrate`. Fork of [johnnyvizz/claude-kit](https://github.com/johnnyvizz/claude-kit) savvy-progress. | [1.4.0](plugins/savvy-progress/CHANGELOG.md) | MIT |
+| [savvy-progress](plugins/savvy-progress/README.md) | Progress bar above the prompt and a live agents panel for `/orchestrate`. Fork of [johnnyvizz/claude-kit](https://github.com/johnnyvizz/claude-kit) savvy-progress. | [1.5.0](plugins/savvy-progress/CHANGELOG.md) | MIT |
 | [keikat](plugins/keikat/skills/keikat/SKILL.md) | `/keikat`: music gigs in Finland's 17 largest cities, as one list with prices and ticket status, in the terminal and as a filterable web page. | [1.0.0](plugins/keikat/CHANGELOG.md) | MIT |
 | [nayttelyt](plugins/nayttelyt/skills/nayttelyt/SKILL.md) | `/nayttelyt`: exhibitions (art, photography, design, museums) open in a city this week or a chosen period, with hours, prices and tags, in the terminal and as a web page. Oulu and Helsinki for now. | [1.1.0](plugins/nayttelyt/CHANGELOG.md) | MIT |
 | [elokuvat](plugins/elokuvat/skills/elokuvat/SKILL.md) | `/elokuvat`: cinema showtimes (Finnkino and independent cinemas) in a Finnish city tonight, tomorrow or this week, with booking links, in the terminal and as a filterable web page. | [1.0.0](plugins/elokuvat/CHANGELOG.md) | MIT |

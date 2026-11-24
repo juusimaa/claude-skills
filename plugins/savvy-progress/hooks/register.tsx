@@ -445,9 +445,13 @@ const costOf = (model: string, u: Usage, isRequest: boolean): number => {
 // Haiku 4.5 and the Claude 3 models have a 200K window; the rest, Haiku 5.5 included, 1M.
 const windowOf = (model: string): number => (/haiku-4|claude-3/i.test(model) ? 200_000 : 1_000_000)
 
+// /orchestrate's workers borrow the savvy tier that matches their effort.
+const WORKER_TIER: Record<string, string> = { 'haiku-worker': 'light', 'sonnet-worker': 'medium' }
+
 // `savvy-careful`, or `savvy-flow:savvy-careful` when the agents ship in a plugin.
 const tierOf = (type: string): string => {
   const bare = type.replace(/^[^:]*:/, '')
+  if (Object.hasOwn(WORKER_TIER, bare)) return WORKER_TIER[bare] ?? 'other'
   const t = bare.replace(/^savvy-/, '').toLowerCase()
   return Object.hasOwn(TIER_COLOR, t) && bare.startsWith('savvy-') ? t : 'other'
 }
@@ -464,7 +468,14 @@ const norm = (s: string): string => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, 
 const fmtTokens = (n: number): string =>
   n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : `${Math.round(n)}`
 
-const fmtCost = (usd: number): string => `$${usd < 10 ? usd.toFixed(2) : usd.toFixed(1)}`
+// shortcut: a fixed USD->EUR rate (2026-11), update it when the rate drifts far.
+const EUR_PER_USD = 0.86
+let currency = 'USD'
+const fmtCost = (usd: number): string => {
+  if (currency !== 'EUR') return `$${usd < 10 ? usd.toFixed(2) : usd.toFixed(1)}`
+  const eur = usd * EUR_PER_USD
+  return `${(eur < 10 ? eur.toFixed(2) : eur.toFixed(1)).replace('.', ',')} €`
+}
 
 const fmtTime = (ms: number): string => {
   const s = Math.max(0, Math.round(ms / 1000))
@@ -802,6 +813,7 @@ export const register: Register = (on, options) => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
     lang = await detectLang($, options.language)
+    currency = options.currency === 'EUR' ? 'EUR' : 'USD'
     await $.tool.register({
       name: 'progress',
       description:
