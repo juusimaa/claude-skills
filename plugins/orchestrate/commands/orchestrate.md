@@ -26,6 +26,8 @@ Worker names (hard rule): launch workers ONLY as `orchestrate:haiku-worker` and 
    - (worktree mode) If there is groundwork, add one line naming the files you will commit as groundwork; my OK covers that commit.
 
 4. Delegate
+   Progress first: before launching any worker, look for `mcp__savvy-progress__progress` and, if it exists, report the plan with it (see "Progress bar" below). Do not skip this when the tool exists: without that call the progress bar above my prompt never appears.
+
    (worktree mode) Before launching any worker, go through this checklist in order and say in one line per item what you found:
    1. Git: if `git rev-parse HEAD` fails (not a git repo, or no commits yet), tell me and use shared mode instead.
    2. Start point: worktrees start from `origin/<default branch>` unless the setting `worktree.baseRef` is `"head"`. Read it from `.claude/settings.local.json`, then `.claude/settings.json`, then `~/.claude/settings.json`; the first file that sets it wins. If none sets it to `"head"`, ask me, as its own question, for permission to add `"worktree": {"baseRef": "head"}` to this project's `.claude/settings.local.json` (merge into the existing JSON, keep everything else; if `git check-ignore` says the file is not ignored, add it to `.git/info/exclude`, never to a tracked file such as `.gitignore`). If I say no, use shared mode instead.
@@ -51,10 +53,11 @@ Worker names (hard rule): launch workers ONLY as `orchestrate:haiku-worker` and 
    - (worktree mode) Remove a worktree (`git worktree remove --force <worktree>`, then `git branch -D <its branch>`) only once its changes are applied, or once you have decided to drop or re-delegate that subtask.
    - Fix or re-delegate anything wrong.
    - If a worker fails or reports a blocker or an open question: answer it and re-brief it once, as a new Agent call with a full brief (in worktree mode it gets a fresh worktree; the old one's changes are not carried over). If it still fails, do the subtask yourself and say so in the summary.
+   - Each time you accept a subtask, report `done` to the progress tool (if it exists).
    - Run the full test suite / build and fix failures.
-   - Summarize what was done and by whom.
+   - Report `finished: true` to the progress tool (if it exists), then summarize what was done and by whom.
 
-Progress bar (optional, needs the savvy-progress plugin)
+Progress bar (needs the savvy-progress plugin; required whenever its tool exists)
 If the tool `mcp__savvy-progress__progress` appears among your tools, including as a deferred tool, it is available: a deferred tool only needs loading first with ToolSearch (`select:mcp__savvy-progress__progress`). If the tool is absent or ToolSearch does not find it, skip every progress call silently; the rest of this command works without it. Call it:
 - right after I approve the plan: `title` (a few words), `total` (number of worker subtasks, not counting work you do yourself), `tasks` (`[{ title, tier, model, effort, after }]` in plan order; `after` is the numbers of the tasks it waits for), `phase: "delegate"`;
 - each time a subtask is accepted in review: `done` (accepted so far), with `phase: "review"` while reviewing and back to `"delegate"` when launching more;

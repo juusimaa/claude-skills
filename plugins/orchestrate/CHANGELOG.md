@@ -1,8 +1,12 @@
 # Changelog
 
-## 1.1.1 – 2026-11-24
+## 1.1.2 – 2026-11-24
 
 - Planned tasks sent to savvy-progress now carry `model` and `effort`, so the agents panel shows Haiku and Sonnet before workers start, not Opus. Needs savvy-progress 1.3.0 from this repository; the original 1.2.1 ignores the new fields.
+
+## 1.1.1 – 2026-11-23
+
+- The progress report is now a required part of steps 4 and 5 whenever savvy-progress is installed. Orchestrators were skipping the optional section at the end, so the progress bar above the prompt never appeared.
 
 ## 1.1.0 – 2026-11-23
 
