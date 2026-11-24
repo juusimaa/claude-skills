@@ -11,6 +11,11 @@
       "description": "/orchestrate: plan with the session model, implement in parallel with Haiku and Sonnet workers."
     },
     {
+      "name": "savvy-progress",
+      "source": "./plugins/savvy-progress",
+      "description": "Mod: progress bar and live agents panel for /orchestrate and savvy-flow. Fork of johnnyvizz/claude-kit savvy-progress."
+    },
+    {
       "name": "keikat",
       "source": "./plugins/keikat",
       "description": "/keikat: Suomen 17 suurimman kaupungin musiikkikeikat hintoineen ja lipputilanteineen."
