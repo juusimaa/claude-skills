@@ -6,11 +6,11 @@ My own plugins and skills for [Claude Code](https://claude.com/claude-code): a c
 
 | Plugin | Description | Version | License |
 |---|---|---|---|
-| [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: the session model plans a task, and Haiku and Sonnet workers implement the subtasks in parallel. | [1.1.1](plugins/orchestrate/CHANGELOG.md) | Apache-2.0 |
+| [orchestrate](plugins/orchestrate/commands/orchestrate.md) | `/orchestrate`: the session model plans a task, and Haiku and Sonnet workers implement the subtasks in parallel. | [1.1.1](plugins/orchestrate/CHANGELOG.md) | MIT |
 | [savvy-progress](plugins/savvy-progress/README.md) | Progress bar above the prompt and a live agents panel for `/orchestrate`. Fork of [johnnyvizz/claude-kit](https://github.com/johnnyvizz/claude-kit) savvy-progress. | [1.3.0](plugins/savvy-progress/CHANGELOG.md) | MIT |
-| [keikat](plugins/keikat/skills/keikat/SKILL.md) | `/keikat`: music gigs in Finland's 17 largest cities, as one list with prices and ticket status, in the terminal and as a filterable web page. | [1.0.0](plugins/keikat/CHANGELOG.md) | Apache-2.0 |
-| [nayttelyt](plugins/nayttelyt/skills/nayttelyt/SKILL.md) | `/nayttelyt`: exhibitions (art, photography, design, museums) open in a city this week or a chosen period, with hours, prices and tags, in the terminal and as a web page. Oulu and Helsinki for now. | [1.1.0](plugins/nayttelyt/CHANGELOG.md) | Apache-2.0 |
-| [elokuvat](plugins/elokuvat/skills/elokuvat/SKILL.md) | `/elokuvat`: cinema showtimes (Finnkino and independent cinemas) in a Finnish city tonight, tomorrow or this week, with booking links, in the terminal and as a filterable web page. | [1.0.0](plugins/elokuvat/CHANGELOG.md) | Apache-2.0 |
+| [keikat](plugins/keikat/skills/keikat/SKILL.md) | `/keikat`: music gigs in Finland's 17 largest cities, as one list with prices and ticket status, in the terminal and as a filterable web page. | [1.0.0](plugins/keikat/CHANGELOG.md) | MIT |
+| [nayttelyt](plugins/nayttelyt/skills/nayttelyt/SKILL.md) | `/nayttelyt`: exhibitions (art, photography, design, museums) open in a city this week or a chosen period, with hours, prices and tags, in the terminal and as a web page. Oulu and Helsinki for now. | [1.1.0](plugins/nayttelyt/CHANGELOG.md) | MIT |
+| [elokuvat](plugins/elokuvat/skills/elokuvat/SKILL.md) | `/elokuvat`: cinema showtimes (Finnkino and independent cinemas) in a Finnish city tonight, tomorrow or this week, with booking links, in the terminal and as a filterable web page. | [1.0.0](plugins/elokuvat/CHANGELOG.md) | MIT |
 
 ## Installation
 
@@ -237,7 +237,7 @@ The scripts read public event pages, and the pages' structure may change. If a s
 
 ## License
 
-The whole repository is under the [Apache-2.0](LICENSE) license. You may use, modify and share the plugins, including commercially, under the license's terms. The copyright notice is in [NOTICE](NOTICE).
+The whole repository is under the [MIT](LICENSE) license. You may use, modify and share the plugins, including commercially, as long as the copyright and license notice stay with them. [savvy-progress](plugins/savvy-progress) is a fork of johnnyvizz's MIT-licensed original and keeps its own [LICENSE](plugins/savvy-progress/LICENSE).
 
 Versions before this change (the earlier commits of the `keikat` plugin) were released under PolyForm Noncommercial 1.0.0.
 
