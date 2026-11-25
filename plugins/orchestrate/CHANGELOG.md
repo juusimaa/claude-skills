@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3 – 2026-11-25
+
+- The plan table is now required and must be in the message text. In the desktop app it often went missing, because the app treats its task list as the plan or the approval question took the plan's place.
+
 ## 1.1.2 – 2026-11-24
 
 - Planned tasks sent to savvy-progress now carry `model` and `effort`, so the agents panel shows Haiku and Sonnet before workers start, not Opus. Needs savvy-progress 1.3.0 from this repository; the original 1.2.1 ignores the new fields.
