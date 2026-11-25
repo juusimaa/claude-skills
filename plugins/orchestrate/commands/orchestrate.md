@@ -21,7 +21,7 @@ Worker names (hard rule): launch workers ONLY as `orchestrate:haiku-worker` and 
    - sonnet-worker: needs some judgment, but is well-scoped.
    - Yourself: architecture, cross-cutting changes, tricky logic, anything security-sensitive.
 
-3. Plan table (required, even if your environment shows a task list or says not to restate the plan): write it as a markdown table in your message text, never only inside a question dialog, task list or wrap-up box. Columns: # | subtask | worker | files. Under the table, name the mode in one line. Then wait for my OK before launching workers.
+3. Plan table (required, even if your environment shows a task list or says not to restate the plan): write it as a markdown table in your message text, in the last message of the turn, after any wrap-up or next-step call (text written before that call may be shortened to a summary), never only inside a question dialog, task list or wrap-up box. Columns: # | subtask | worker | files. Under the table, name the mode in one line. Then wait for my OK before launching workers.
    - (shared mode) If two or more workers will build or run tests at the same time and could trip over shared build output or caches, say so in that line and suggest worktree mode; if I ask for it, switch to worktree mode.
    - (worktree mode) If there is groundwork, add one line naming the files you will commit as groundwork; my OK covers that commit.
 
