@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4 – 2026-11-25
+
+- The plan table now goes in the last message of the turn, after any wrap-up call. The desktop app may shorten text written before that call to a one-line summary, which dropped the table.
+
 ## 1.1.3 – 2026-11-25
 
 - The plan table is now required and must be in the message text. In the desktop app it often went missing, because the app treats its task list as the plan or the approval question took the plan's place.
